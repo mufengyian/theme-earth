@@ -15,16 +15,17 @@
     <a
       th:if="${hasPrevious}"
       th:href="@{${prevUrl}}"
-      class="inline-flex size-9 items-center justify-center rounded-lg text-gray-600 transition-all hover:bg-gray-100 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
-      th:aria-label="#{common.previousPage}"
+      class="inline-flex h-9 items-center gap-1 rounded-lg px-3 text-sm font-medium text-gray-600 transition-all hover:bg-gray-100 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
     >
-      <span class="icon-[tabler--chevron-left] text-lg"></span>
+      <span class="icon-[tabler--chevron-left]"></span>
+      <span th:text="#{common.previousPage}"></span>
     </a>
     <span
       th:unless="${hasPrevious}"
-      class="inline-flex size-9 cursor-default items-center justify-center rounded-lg text-gray-300 dark:text-slate-600"
+      class="inline-flex h-9 cursor-default items-center gap-1 rounded-lg px-3 text-sm font-medium text-gray-300 dark:text-slate-600"
     >
-      <span class="icon-[tabler--chevron-left] text-lg"></span>
+      <span class="icon-[tabler--chevron-left]"></span>
+      <span th:text="#{common.previousPage}"></span>
     </span>
 
     <!-- 首页 -->
@@ -48,8 +49,9 @@
           th:attr="data-page=${tp}"
           th:text="${tp}"
           th:class="${tp == page}
-            ? 'inline-flex size-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-semibold text-white dark:bg-blue-500 cursor-default'
+            ? 'inline-flex size-9 cursor-default items-center justify-center rounded-lg text-sm font-semibold text-white'
             : 'inline-flex size-9 items-center justify-center rounded-lg text-sm font-medium text-gray-600 transition-all hover:bg-gray-100 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'"
+          th:style="${tp == page} ? 'background-color:var(--earthquake-primary)' : ''"
         ></button>
       </th:block>
     </th:block>
@@ -69,16 +71,17 @@
     <a
       th:if="${hasNext}"
       th:href="@{${nextUrl}}"
-      class="inline-flex size-9 items-center justify-center rounded-lg text-gray-600 transition-all hover:bg-gray-100 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
-      th:aria-label="#{common.nextPage}"
+      class="inline-flex h-9 items-center gap-1 rounded-lg px-3 text-sm font-medium text-gray-600 transition-all hover:bg-gray-100 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
     >
-      <span class="icon-[tabler--chevron-right] text-lg"></span>
+      <span th:text="#{common.nextPage}"></span>
+      <span class="icon-[tabler--chevron-right]"></span>
     </a>
     <span
       th:unless="${hasNext}"
-      class="inline-flex size-9 cursor-default items-center justify-center rounded-lg text-gray-300 dark:text-slate-600"
+      class="inline-flex h-9 cursor-default items-center gap-1 rounded-lg px-3 text-sm font-medium text-gray-300 dark:text-slate-600"
     >
-      <span class="icon-[tabler--chevron-right] text-lg"></span>
+      <span th:text="#{common.nextPage}"></span>
+      <span class="icon-[tabler--chevron-right]"></span>
     </span>
   </nav>
 
