@@ -6,10 +6,10 @@
 >
   <div
     th:if="${cover} and ${not #strings.isEmpty(post.spec.cover)}"
-    class="aspect-video overflow-hidden"
+    class="relative aspect-video overflow-hidden"
     th:classappend="${direction == 'column' ? 'col-span-2' : ''}"
   >
-    <a class="block size-full" th:href="@{${post.status.permalink}}" th:title="${post.spec.title}">
+    <a class="absolute inset-0" th:href="@{${post.status.permalink}}" th:title="${post.spec.title}">
       <img
         th:src="${post.spec.cover}"
         th:alt="${post.spec.title}"
