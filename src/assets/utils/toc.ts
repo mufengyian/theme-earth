@@ -163,7 +163,7 @@ const createActiveHeadingUpdater = (headings: HTMLHeadingElement[]) => {
   };
 };
 
-export const destroyToc = () => {
+const destroyToc = () => {
   cleanupToc?.();
   cleanupToc = undefined;
 };

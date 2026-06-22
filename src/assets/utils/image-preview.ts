@@ -820,7 +820,7 @@ export const initImagePreview = () => {
   };
 };
 
-export const destroyImagePreview = () => {
+const destroyImagePreview = () => {
   cleanupDocumentClick?.();
   cleanupKeyboard?.();
   cleanupDocumentClick = undefined;

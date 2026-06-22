@@ -25,7 +25,6 @@
     "@iconify-json/simple-icons": "^1.2.86",
     "@iconify-json/tabler": "^1.2.35",
     "@iconify/tailwind4": "^1.2.3",
-    "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.0.0",
     "@types/alpinejs": "^3.13.11",

@@ -1,4 +1,3 @@
-import aspectRatio from "@tailwindcss/aspect-ratio";
 import typography from "@tailwindcss/typography";
 
 /** @type {import('tailwindcss').Config} */
@@ -9,13 +8,5 @@ export default {
     "./settings.yaml",
   ],
   darkMode: "class",
-  theme: {
-    extend: {
-      lineClamp: {
-        7: "7",
-        8: "8",
-      },
-    },
-  },
-  plugins: [aspectRatio, typography],
+  plugins: [typography],
 };
