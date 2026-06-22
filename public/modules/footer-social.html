@@ -1,4 +1,4 @@
-<th:block th:with="social_media = ${theme.config.footer.social_media}">
+<th:block th:fragment="social(items)" th:with="social_media = ${items}">
   <div
     th:unless="${#lists.isEmpty(social_media)}"
     class="mb-4 flex justify-center space-x-6"

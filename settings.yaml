@@ -450,6 +450,8 @@ spec:
                   value: icp
                 - label: 公安联网备案
                   value: gongan
+                - label: 社交媒体
+                  value: social_media
             - $formkit: group
               if: "$value.value === 'icp'"
               name: options
@@ -468,38 +470,44 @@ spec:
                 - $formkit: text
                   name: text
                   label: 公安联网备案号
-        - $formkit: array
-          name: social_media
-          label: 社交媒体
-          value: []
-          itemLabels:
-            - type: "iconify"
-              label: "$value.iconify"
-            - type: "text"
-              label: "$value.name"
-            - type: "text"
-              label: "$value.url"
-          children:
-            - $formkit: iconify
-              name: iconify
-              label: 图标
-              format: svg
-              validation: "required"
-            - $formkit: text
-              name: name
-              label: 名称
-            - $formkit: text
-              name: url
-              label: 链接
-              validation: "required"
-            - $formkit: select
-              name: url_type
-              label: 链接类型
-              value: normal
-              help: "如果选择了图片类型，那么在访客点击之后会使用弹框的形式加载"
-              options:
-                - label: 跳转链接
-                  value: normal
-                - label: 图片
-                  value: image
+            - $formkit: group
+              if: "$value.value === 'social_media'"
+              name: options
+              key: social-options
+              label: 社交媒体
+              children:
+                - $formkit: array
+                  name: items
+                  label: 链接
+                  value: []
+                  itemLabels:
+                    - type: "iconify"
+                      label: "$value.iconify"
+                    - type: "text"
+                      label: "$value.name"
+                    - type: "text"
+                      label: "$value.url"
+                  children:
+                    - $formkit: iconify
+                      name: iconify
+                      label: 图标
+                      format: svg
+                      validation: "required"
+                    - $formkit: text
+                      name: name
+                      label: 名称
+                    - $formkit: text
+                      name: url
+                      label: 链接
+                      validation: "required"
+                    - $formkit: select
+                      name: url_type
+                      label: 链接类型
+                      value: normal
+                      help: "如果选择了图片类型，那么在访客点击之后会使用弹框的形式加载"
+                      options:
+                        - label: 跳转链接
+                          value: normal
+                        - label: 图片
+                          value: image
 
