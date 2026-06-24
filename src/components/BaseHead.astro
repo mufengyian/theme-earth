@@ -33,12 +33,12 @@
 <meta
   th:if="${post?.spec?.publishTime != null}"
   property="article:published_time"
-  th:content="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd''T''HH:mm:ssXXX')}"
+  th:content="${#temporals.format(post.spec.publishTime, 'yyyy-MM-dd''T''HH:mm:ssXXX')}"
 />
 <meta
   th:if="${post?.spec?.publishTime != null}"
   property="article:modified_time"
-  th:content="${post.spec.lastModifyTime != null ? #dates.format(post.spec.lastModifyTime, 'yyyy-MM-dd''T''HH:mm:ssXXX') : #dates.format(post.spec.publishTime, 'yyyy-MM-dd''T''HH:mm:ssXXX')}"
+  th:content="${post.spec.lastModifyTime != null ? #temporals.format(post.spec.lastModifyTime, 'yyyy-MM-dd''T''HH:mm:ssXXX') : #temporals.format(post.spec.publishTime, 'yyyy-MM-dd''T''HH:mm:ssXXX')}"
 />
 </th:block>
 
@@ -78,11 +78,11 @@
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": [[${post.spec.title}]],
-  "datePublished": [[${#dates.format(post.spec.publishTime, 'yyyy-MM-dd''T''HH:mm:ssXXX')}]],
-  "dateModified": [[${post.spec.lastModifyTime != null ? #dates.format(post.spec.lastModifyTime, 'yyyy-MM-dd''T''HH:mm:ssXXX') : #dates.format(post.spec.publishTime, 'yyyy-MM-dd''T''HH:mm:ssXXX')}]],
+  "datePublished": [[${#temporals.format(post.spec.publishTime, 'yyyy-MM-dd''T''HH:mm:ssXXX')}]],
+  "dateModified": [[${post.spec.lastModifyTime != null ? #temporals.format(post.spec.lastModifyTime, 'yyyy-MM-dd''T''HH:mm:ssXXX') : #temporals.format(post.spec.publishTime, 'yyyy-MM-dd''T''HH:mm:ssXXX')}]],
   "author": {
     "@type": "Person",
-    "name": [[${post.contributors[0]?.displayName ?: site.title}]]
+    "name": [[${site.title}]]
   },
   "publisher": {
     "@type": "Organization",
