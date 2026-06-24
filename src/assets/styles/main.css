@@ -9,6 +9,8 @@ html {
   scroll-behavior: smooth;
   scrollbar-color: rgba(100, 116, 139, 0.55) transparent;
   scrollbar-width: thin;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html.dark {
@@ -454,4 +456,10 @@ select {
   .reading-progress-fill {
     transition: none;
   }
+}
+
+/* Scroll to top button — initial hidden state (avoid inline style) */
+.btn-scroll-to-top {
+  opacity: 0;
+  pointer-events: none;
 }
