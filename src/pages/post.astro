@@ -31,7 +31,8 @@ import Layout from "../layouts/Layout.astro";
 
     <div
       class="content-wrapper post-detail animated fadeIn min-w-0 pt-12 lg:flex-1 lg:px-6 lg:pb-8 lg:pt-16"
-      th:attr="x-data=|Object.assign(upvote('post','content.halo.run','posts'), share(${theme.config.post.share_item_ids}), { name: '${post.metadata.name}' })|"
+      th:attr="data-post-name=${post.metadata.name}, data-share-ids=${theme.config.post.share_item_ids != null ? #strings.listJoin(theme.config.post.share_item_ids, ',') : ''}"
+      x-data="Object.assign(upvote('post','content.halo.run','posts'), share($el.dataset.shareIds ? $el.dataset.shareIds.split(',') : []), { name: $el.dataset.postName })"
     >
       <div
         th:unless="${titleOnCover}"
@@ -44,7 +45,8 @@ import Layout from "../layouts/Layout.astro";
         </h1>
         <div
           sec:authorize="isAuthenticated()"
-          th:attr="x-data=|uiPermission('${#authentication.name}','system:posts:manage')|"
+          th:attr="data-current-user=${#authentication.name}"
+          x-data="uiPermission('system:posts:manage', $el.dataset.currentUser)"
         >
           <template x-if="shouldDisplay">
             <a

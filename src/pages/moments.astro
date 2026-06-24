@@ -41,11 +41,11 @@ import Layout from "../layouts/Layout.astro";
           <ul
             role="list"
             class="divide-y divide-gray-100 dark:divide-slate-700"
-            x-data="upvote('moment','moment.halo.run','moments')"
           >
             <li
               th:each="moment : ${moments.items}"
-              th:attr="x-data=|{name:'${moment.metadata.name}',showComment:false}|"
+              th:attr="data-moment-name=${moment.metadata.name}"
+              x-data="Object.assign(upvote('moment','moment.halo.run','moments'), { name: $el.dataset.momentName, showComment: false })"
               th:with="content=${moment.spec.content}"
               class="animated fadeIn w-full py-5"
             >

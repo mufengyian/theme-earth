@@ -37,8 +37,14 @@
   inset: 0;
   z-index: 1;
   background: rgba(2, 6, 23, 0.9);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+}
+
+/* Progressive enhancement for backdrop-filter */
+@supports (backdrop-filter: blur(1px)) {
+  .earthquake-preview__backdrop {
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
 }
 
 .earthquake-preview__viewport {
@@ -179,10 +185,16 @@
   border: 1px solid rgba(226, 232, 240, 0.14);
   border-radius: 8px;
   box-shadow: 0 20px 44px rgba(0, 0, 0, 0.28);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
-  backdrop-filter: blur(18px) saturate(150%);
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.8) transparent;
+}
+
+/* Progressive enhancement for info panel backdrop-filter */
+@supports (backdrop-filter: blur(1px)) {
+  .earthquake-preview__info {
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    backdrop-filter: blur(18px) saturate(150%);
+  }
 }
 
 .earthquake-preview__title {
@@ -257,10 +269,16 @@
   border: 1px solid rgba(226, 232, 240, 0.12);
   border-radius: 8px;
   box-shadow: 0 16px 38px rgba(0, 0, 0, 0.24);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
-  backdrop-filter: blur(18px) saturate(150%);
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.8) transparent;
+}
+
+/* Progressive enhancement for rail backdrop-filter */
+@supports (backdrop-filter: blur(1px)) {
+  .earthquake-preview__rail {
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    backdrop-filter: blur(18px) saturate(150%);
+  }
 }
 
 .earthquake-preview__thumb {

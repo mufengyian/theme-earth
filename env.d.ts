@@ -54,8 +54,5 @@ declare global {
     colorScheme: "dark" | "light" | "system";
     enableChangeColorScheme: boolean;
     enableColorSchemeAnimation: boolean;
-    docsme?: {
-      disableThemeFunction: boolean;
-    };
   }
 }

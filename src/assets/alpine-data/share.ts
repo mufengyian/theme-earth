@@ -13,6 +13,7 @@ type ShareState = {
   title: string;
   shareModal: boolean;
   copied: boolean;
+  copyTimer: number | undefined;
   presetShareItems: ShareItem[];
   readonly activeShareItems: ShareItem[];
   handleShare(id: string): Promise<void>;
@@ -26,12 +27,28 @@ const shareUrl = (template: string, values: Record<string, string>) =>
 
 const isShareItem = (item?: ShareItem): item is ShareItem => Boolean(item);
 
-export default (shareIds: string[]) =>
+const normalizeShareIds = (shareIds: string | string[]): string[] => {
+  if (Array.isArray(shareIds)) {
+    return shareIds;
+  }
+
+  if (typeof shareIds === "string" && shareIds.length > 0) {
+    return shareIds
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
+export default (shareIds: string | string[]) =>
   ({
     permalink: window.location.href,
     title: document.title,
     shareModal: false,
     copied: false,
+    copyTimer: undefined,
     presetShareItems: [
       {
         id: "x",
@@ -97,7 +114,7 @@ export default (shareIds: string[]) =>
       },
     ],
     get activeShareItems() {
-      return shareIds
+      return normalizeShareIds(shareIds)
         .map((id) => this.presetShareItems.find((item) => item.id === id))
         .filter(isShareItem)
         .filter(
@@ -139,9 +156,18 @@ export default (shareIds: string[]) =>
       );
     },
     async handleCopy() {
-      await navigator.clipboard.writeText(this.permalink);
+      try {
+        await navigator.clipboard.writeText(this.permalink);
+      } catch {
+        // Clipboard API may be unavailable (insecure context) or denied by
+        // the user. Silently no-op so the UI never shows a stuck "copied".
+        return;
+      }
       this.copied = true;
-      setTimeout(() => {
+      if (this.copyTimer) {
+        window.clearTimeout(this.copyTimer);
+      }
+      this.copyTimer = window.setTimeout(() => {
         this.copied = false;
       }, 2000);
     },

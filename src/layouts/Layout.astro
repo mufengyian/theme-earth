@@ -13,12 +13,24 @@ import Header from "../components/Header.astro";
   </head>
   <body
     class="bg-slate-50 dark:bg-slate-900"
-    th:with="fontClass = ${theme.config.style.font_family == 'roboto' ? 'font-roboto' : (theme.config.style.font_family == 'jetbrains_mono' ? 'font-jetbrains-mono' : (theme.config.style.font_family == 'misans' ? 'font-misans' : (theme.config.style.font_family == 'lxgw_wenkai' ? 'font-lxgw-wenkai' : '')))}, stylePreset = ${'theme-preset-' + (theme.config.style.style_preset ?: 'earthquake')}"
+    th:with="fontClass = ${theme.config.style.font_family == 'noto_sans_sc' ? 'font-noto-sans-sc' : (theme.config.style.font_family == 'noto_serif_sc' ? 'font-noto-serif-sc' : (theme.config.style.font_family == 'lxgw_wenkai' ? 'font-lxgw-wenkai' : ''))}, stylePreset = ${'theme-preset-' + (theme.config.style.style_preset ?: 'earthquake')}"
     th:classappend="${fontClass} + ' ' + ${stylePreset}"
   >
+    <!-- Skip to content link for keyboard accessibility -->
+    <a href="#main-content" class="skip-to-content">Skip to content</a>
+
+    <!-- Reading progress bar -->
+    <div
+      th:if="${theme.config.layout.show_reading_progress != false}"
+      class="reading-progress-bar"
+      id="reading-progress-bar"
+    >
+      <div class="reading-progress-fill"></div>
+    </div>
+
     <Header />
 
-    <main>
+    <main id="main-content" tabindex="-1">
       <slot />
     </main>
 
@@ -29,7 +41,8 @@ import Header from "../components/Header.astro";
       type="button"
       id="btn-scroll-to-top"
       th:aria-label="#{fragment.layout.toTop}"
-      class="fixed bottom-5 right-5 flex items-center justify-center rounded-full bg-white p-3 opacity-0 shadow transition-all duration-300 hover:opacity-70 hover:shadow-lg dark:bg-slate-600 lg:bottom-10 lg:right-10"
+      class="fixed bottom-5 right-5 flex items-center justify-center rounded-full bg-white p-3 shadow transition-all duration-300 hover:opacity-70 hover:shadow-lg dark:bg-slate-600 lg:bottom-10 lg:right-10"
+      style="opacity: 0; pointer-events: none;"
     >
       <span
         class="icon-[tabler--chevron-up] text-2xl text-gray-600 dark:text-slate-200"

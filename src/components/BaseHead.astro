@@ -1,5 +1,4 @@
 <meta charset="UTF-8" />
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta
   name="viewport"
   content="width=device-width, initial-scale=1, maximum-scale=2"
@@ -10,6 +9,100 @@
   th:href="${site.logo}"
   as="image"
 />
+
+<!-- SEO: Open Graph (theme.config.seo.enable_og) -->
+<th:block th:if="${theme.config.seo?.enable_og}">
+<meta property="og:site_name" th:content="${site.title}" />
+<meta property="og:title" th:content="${post?.spec?.title ?: page?.spec?.title ?: site.title}" />
+<meta
+  property="og:description"
+  th:content="${post?.spec?.excerpt ?: page?.spec?.excerpt ?: site.subtitle ?: ''}"
+/>
+<meta
+  property="og:image"
+  th:with="cover = ${post?.spec?.cover ?: page?.spec?.cover ?: site.logo ?: ''}"
+  th:unless="${#strings.isEmpty(cover)}"
+  th:content="|${site.url}${cover}|"
+/>
+<meta property="og:type" th:content="${post != null ? 'article' : 'website'}" />
+<meta
+  property="og:url"
+  th:with="permalink = ${post?.status?.permalink ?: page?.status?.permalink ?: '/'}"
+  th:content="|${site.url}${permalink}|"
+/>
+<meta
+  th:if="${post?.spec?.publishTime != null}"
+  property="article:published_time"
+  th:content="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd''T''HH:mm:ssXXX')}"
+/>
+<meta
+  th:if="${post?.spec?.publishTime != null}"
+  property="article:modified_time"
+  th:content="${post.spec.lastModifyTime != null ? #dates.format(post.spec.lastModifyTime, 'yyyy-MM-dd''T''HH:mm:ssXXX') : #dates.format(post.spec.publishTime, 'yyyy-MM-dd''T''HH:mm:ssXXX')}"
+/>
+</th:block>
+
+<!-- SEO: Twitter Card (theme.config.seo.enable_twitter_card) -->
+<th:block th:if="${theme.config.seo?.enable_twitter_card}">
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" th:content="${post?.spec?.title ?: page?.spec?.title ?: site.title}" />
+<meta
+  name="twitter:description"
+  th:content="${post?.spec?.excerpt ?: page?.spec?.excerpt ?: site.subtitle ?: ''}"
+/>
+<meta
+  name="twitter:image"
+  th:with="cover = ${post?.spec?.cover ?: page?.spec?.cover ?: site.logo ?: ''}"
+  th:unless="${#strings.isEmpty(cover)}"
+  th:content="|${site.url}${cover}|"
+/>
+</th:block>
+
+<!-- SEO: Canonical URL (theme.config.seo.enable_canonical) -->
+<link
+  th:if="${theme.config.seo?.enable_canonical}"
+  rel="canonical"
+  th:with="permalink = ${post?.status?.permalink ?: page?.status?.permalink}"
+  th:unless="${permalink == null}"
+  th:href="|${site.url}${permalink}|"
+/>
+
+<!-- SEO: JSON-LD Structured Data (theme.config.seo.enable_json_ld) -->
+<th:block th:if="${theme.config.seo?.enable_json_ld and post != null}">
+<script
+  is:inline
+  type="application/ld+json"
+  th:inline="javascript"
+>
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": [[${post.spec.title}]],
+  "datePublished": [[${#dates.format(post.spec.publishTime, 'yyyy-MM-dd''T''HH:mm:ssXXX')}]],
+  "dateModified": [[${post.spec.lastModifyTime != null ? #dates.format(post.spec.lastModifyTime, 'yyyy-MM-dd''T''HH:mm:ssXXX') : #dates.format(post.spec.publishTime, 'yyyy-MM-dd''T''HH:mm:ssXXX')}]],
+  "author": {
+    "@type": "Person",
+    "name": [[${post.contributors[0]?.displayName ?: site.title}]]
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": [[${site.title}]],
+    "logo": {
+      "@type": "ImageObject",
+      "url": [[${site.logo != null ? site.url + site.logo : null}]]
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": [[${site.url + post.status.permalink}]]
+  },
+  "image": [[${post.spec.cover != null ? site.url + post.spec.cover : null}]],
+  "description": [[${post.spec.excerpt ?: ''}]]
+}
+</script>
+</th:block>
+
+<!-- Font loading via jsDelivr CDN -->
 <link
   th:if="${(theme.config.style.font_family ?: 'system') != 'system'}"
   rel="preconnect"
@@ -17,53 +110,52 @@
   crossorigin
 />
 <link
-  th:if="${theme.config.style.font_family == 'roboto'}"
+  th:if="${theme.config.style.font_family == 'noto_sans_sc'}"
   rel="preload"
-  href="https://cdn.jsdelivr.net/npm/@fontsource/roboto@5.2.10/400.css"
+  href="https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5.2.5/400.css"
   as="style"
   onload="this.onload=null;this.rel='stylesheet'"
+  crossorigin
 />
 <link
-  th:if="${theme.config.style.font_family == 'roboto'}"
+  th:if="${theme.config.style.font_family == 'noto_sans_sc'}"
   rel="preload"
-  href="https://cdn.jsdelivr.net/npm/@fontsource/roboto@5.2.10/500.css"
+  href="https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5.2.5/500.css"
   as="style"
   onload="this.onload=null;this.rel='stylesheet'"
+  crossorigin
 />
 <link
-  th:if="${theme.config.style.font_family == 'roboto'}"
+  th:if="${theme.config.style.font_family == 'noto_sans_sc'}"
   rel="preload"
-  href="https://cdn.jsdelivr.net/npm/@fontsource/roboto@5.2.10/700.css"
+  href="https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5.2.5/700.css"
   as="style"
   onload="this.onload=null;this.rel='stylesheet'"
+  crossorigin
 />
 <link
-  th:if="${theme.config.style.font_family == 'jetbrains_mono'}"
+  th:if="${theme.config.style.font_family == 'noto_serif_sc'}"
   rel="preload"
-  href="https://cdn.jsdelivr.net/npm/@fontsource-variable/jetbrains-mono@5.2.8/index.css"
+  href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5.2.9/400.css"
   as="style"
   onload="this.onload=null;this.rel='stylesheet'"
+  crossorigin
 />
 <link
-  th:if="${theme.config.style.font_family == 'misans'}"
+  th:if="${theme.config.style.font_family == 'noto_serif_sc'}"
   rel="preload"
-  href="https://cdn.jsdelivr.net/npm/misans@4.1.0/lib/Normal/MiSans-Regular.min.css"
+  href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5.2.9/500.css"
   as="style"
   onload="this.onload=null;this.rel='stylesheet'"
+  crossorigin
 />
 <link
-  th:if="${theme.config.style.font_family == 'misans'}"
+  th:if="${theme.config.style.font_family == 'noto_serif_sc'}"
   rel="preload"
-  href="https://cdn.jsdelivr.net/npm/misans@4.1.0/lib/Normal/MiSans-Medium.min.css"
+  href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5.2.9/700.css"
   as="style"
   onload="this.onload=null;this.rel='stylesheet'"
-/>
-<link
-  th:if="${theme.config.style.font_family == 'misans'}"
-  rel="preload"
-  href="https://cdn.jsdelivr.net/npm/misans@4.1.0/lib/Normal/MiSans-Bold.min.css"
-  as="style"
-  onload="this.onload=null;this.rel='stylesheet'"
+  crossorigin
 />
 <link
   th:if="${theme.config.style.font_family == 'lxgw_wenkai'}"
@@ -71,6 +163,7 @@
   href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-light.css"
   as="style"
   onload="this.onload=null;this.rel='stylesheet'"
+  crossorigin
 />
 <link
   th:if="${theme.config.style.font_family == 'lxgw_wenkai'}"
@@ -78,6 +171,7 @@
   href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-regular.css"
   as="style"
   onload="this.onload=null;this.rel='stylesheet'"
+  crossorigin
 />
 <link
   th:if="${theme.config.style.font_family == 'lxgw_wenkai'}"
@@ -85,7 +179,32 @@
   href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-bold.css"
   as="style"
   onload="this.onload=null;this.rel='stylesheet'"
+  crossorigin
 />
+
+<!-- Color scheme init: blocking inline script to prevent FOUC -->
+<script is:inline th:inline="javascript">
+  (function() {
+    var scheme = /*[[${theme.config.style.color_scheme_settings?.color_scheme}]]*/ 'system';
+    var enableChange = /*[[${theme.config.style.color_scheme_settings?.enable_change_color_scheme}]]*/ false;
+
+    if (enableChange) {
+      try {
+        var stored = localStorage.getItem('color-scheme');
+        if (stored === 'dark' || stored === 'light' || stored === 'system') {
+          scheme = stored;
+        }
+      } catch(e) {}
+    }
+
+    var isDark = scheme === 'dark' ||
+      (scheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    document.documentElement.classList.add(isDark ? 'dark' : 'light');
+    document.documentElement.classList.remove(isDark ? 'light' : 'dark');
+  })();
+</script>
+
 <script is:inline th:inline="javascript">
   window.i18nResources = {
     "jsModule.colorSchemeSwitcher.dark": `[(#{jsModule.colorSchemeSwitcher.dark})]`,

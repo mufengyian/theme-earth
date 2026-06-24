@@ -14,7 +14,8 @@ import Layout from "../layouts/Layout.astro";
   >
     <div
       class="content-wrapper post-detail animated fadeIn min-w-0 pt-12 lg:w-3/4 lg:px-8 lg:pb-8 lg:pt-16"
-      th:attr="x-data=|Object.assign(upvote('singlepage','content.halo.run','singlepages'), share(${theme.config.post.share_item_ids}), { name: '${singlePage.metadata.name}' })|"
+      th:attr="data-singlepage-name=${singlePage.metadata.name}, data-share-ids=${theme.config.post.share_item_ids != null ? #strings.listJoin(theme.config.post.share_item_ids, ',') : ''}"
+      x-data="Object.assign(upvote('singlepage','content.halo.run','singlepages'), share($el.dataset.shareIds ? $el.dataset.shareIds.split(',') : []), { name: $el.dataset.singlepageName })"
     >
       <div
         th:unless="${titleOnCover}"
@@ -27,7 +28,8 @@ import Layout from "../layouts/Layout.astro";
         </h1>
         <div
           sec:authorize="isAuthenticated()"
-          th:attr="x-data=|uiPermission('${#authentication.name}','system:singlepages:manage')|"
+          th:attr="data-current-user=${#authentication.name}"
+          x-data="uiPermission('system:singlepages:manage', $el.dataset.currentUser)"
         >
           <template x-if="shouldDisplay">
             <a

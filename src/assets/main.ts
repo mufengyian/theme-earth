@@ -19,6 +19,7 @@ const earthWindow = window as Window & typeof globalThis;
 let scrollUpdateScheduled = false;
 let headerMenu: HTMLElement | null = null;
 let scrollToTopButton: HTMLElement | null = null;
+let readingProgressBar: HTMLElement | null = null;
 
 earthWindow.Alpine = Alpine;
 
@@ -48,6 +49,28 @@ const updateScrollToTopButton = () => {
   scrollToTopButton.style.pointerEvents = visible ? "auto" : "none";
 };
 
+const updateReadingProgressBar = () => {
+  if (!readingProgressBar) {
+    return;
+  }
+
+  const fill = readingProgressBar.querySelector('.reading-progress-fill') as HTMLElement;
+  if (!fill) {
+    return;
+  }
+
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  
+  if (docHeight <= 0) {
+    fill.style.width = '0%';
+    return;
+  }
+
+  const progress = Math.min(100, (scrollTop / docHeight) * 100);
+  fill.style.width = `${progress}%`;
+};
+
 const initScrollToTopButton = () => {
   if (!scrollToTopButton) {
     return;
@@ -68,17 +91,20 @@ const queueScrollUpdate = () => {
     scrollUpdateScheduled = false;
     onScroll();
     updateScrollToTopButton();
+    updateReadingProgressBar();
   });
 };
 
 const initPageInteractions = () => {
   headerMenu = document.getElementById("header-menu");
   scrollToTopButton = document.getElementById("btn-scroll-to-top");
+  readingProgressBar = document.getElementById("reading-progress-bar");
   initScrollToTopButton();
   initImagePreview();
   generateToc("content", ".toc", ".toc-container");
   onScroll();
   updateScrollToTopButton();
+  updateReadingProgressBar();
 };
 
 window.addEventListener("scroll", queueScrollUpdate, { passive: true });

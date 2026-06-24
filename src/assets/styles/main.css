@@ -35,65 +35,35 @@ html.dark::-webkit-scrollbar-thumb {
   margin: 0 auto;
 }
 
-body.font-roboto,
-body.font-roboto button,
-body.font-roboto input,
-body.font-roboto select,
-body.font-roboto textarea {
-  font-family:
-    "Roboto",
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+/* Font family system: use CSS custom properties to reduce repetition */
+body {
+  --body-font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --code-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-body.font-jetbrains-mono,
-body.font-jetbrains-mono button,
-body.font-jetbrains-mono input,
-body.font-jetbrains-mono select,
-body.font-jetbrains-mono textarea {
-  font-family:
-    "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, SFMono-Regular,
-    Menlo, Monaco, Consolas, monospace;
+body.font-noto-sans-sc {
+  --body-font: "Noto Sans SC", "Microsoft YaHei", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-body.font-misans,
-body.font-misans button,
-body.font-misans input,
-body.font-misans select,
-body.font-misans textarea {
-  font-family:
-    "MiSans",
-    "MiSansLatin",
-    "Noto Sans SC",
-    "Microsoft YaHei",
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
+body.font-noto-serif-sc {
+  --body-font: "Noto Serif SC", "Songti SC", "STSong", "SimSun", ui-serif, serif;
 }
 
-body.font-lxgw-wenkai,
-body.font-lxgw-wenkai button,
-body.font-lxgw-wenkai input,
-body.font-lxgw-wenkai select,
-body.font-lxgw-wenkai textarea {
-  font-family:
-    "LXGW WenKai", "Noto Serif SC", "STKaiti", "KaiTi", "Microsoft YaHei",
-    ui-serif, serif;
+body.font-lxgw-wenkai {
+  --body-font: "LXGW WenKai", "Noto Serif SC", "STKaiti", "KaiTi", "Microsoft YaHei", ui-serif, serif;
 }
 
-body.font-roboto code,
-body.font-roboto pre,
-body.font-misans code,
-body.font-misans pre,
-body.font-lxgw-wenkai code,
-body.font-lxgw-wenkai pre {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+body,
+body button,
+body input,
+body select,
+body textarea {
+  font-family: var(--body-font);
+}
+
+body code,
+body pre {
+  font-family: var(--code-font);
 }
 
 body {
@@ -246,17 +216,33 @@ body .markdown-body a {
 }
 
 .menu-sticky {
-  @apply drop-shadow-md backdrop-blur-lg;
+  @apply drop-shadow-md;
+  /* backdrop-filter with fallback for low-end devices */
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  backdrop-filter: saturate(180%) blur(16px);
+}
+
+/* Progressive enhancement: use stronger blur only when backdrop-filter is supported */
+@supports (backdrop-filter: blur(1px)) {
+  .menu-sticky {
+    -webkit-backdrop-filter: saturate(180%) blur(16px);
+    backdrop-filter: saturate(180%) blur(16px);
+  }
 }
 
 #header-menu.header-menu-glass {
   border-bottom: 1px solid rgba(255, 255, 255, 0.5);
   background: rgba(255, 255, 255, var(--header-glass-opacity, 0.72));
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-  -webkit-backdrop-filter: saturate(180%)
-    blur(calc(24px * var(--header-glass-blur-factor, 0.75)));
-  backdrop-filter: saturate(180%)
-    blur(calc(24px * var(--header-glass-blur-factor, 0.75)));
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  #header-menu.header-menu-glass {
+    -webkit-backdrop-filter: saturate(180%)
+      blur(calc(24px * var(--header-glass-blur-factor, 0.75)));
+    backdrop-filter: saturate(180%)
+      blur(calc(24px * var(--header-glass-blur-factor, 0.75)));
+  }
 }
 
 .dark #header-menu.header-menu-glass {
@@ -311,16 +297,16 @@ body .markdown-body a {
 }
 
 .comment-widget {
-  // Borderless: the comment area blends into the page instead of sitting in a
-  // big white card. A thin top rule separates it from the content above.
+  /* Borderless: the comment area blends into the page instead of sitting in a
+     big white card. A thin top rule separates it from the content above. */
   margin-top: 2.5rem;
   padding-top: 2rem;
   border-top: 1px solid var(--earthquake-border);
 }
 
-// Theme the Halo comment component everywhere it renders (post, page, moment,
-// photo) so it follows the active preset and dark mode instead of using its
-// own default palette. Halo mounts `<halo:comment>` as a custom element.
+/* Theme the Halo comment component everywhere it renders (post, page, moment,
+   photo) so it follows the active preset and dark mode instead of using its
+   own default palette. Halo mounts `<halo:comment>` as a custom element. */
 halo-comment-widget,
 .comment-widget {
   --halo-cw-primary-1-color: var(--earthquake-primary);
@@ -360,23 +346,26 @@ halo-comment-widget,
   @apply my-3 ml-3 space-y-1 border-l pl-2;
 }
 
-.pattern-header-text {
-  text-shadow: 2px 2px 10px #000;
-}
-
 .is-active-link {
   @apply rounded bg-gray-100 dark:bg-slate-600;
 }
 
+/* Select dropdown: light arrow for light mode, dark arrow for dark mode */
 select {
   -moz-appearance: none;
   -webkit-appearance: none;
   appearance: none;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='m12 13.171l4.95-4.95l1.414 1.415L12 16L5.636 9.636L7.05 8.222z'/%3E%3C/svg%3E")
-    right 0.3em center no-repeat;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 24 24'%3E%3Cpath fill='%23374151' d='m12 13.171l4.95-4.95l1.414 1.415L12 16L5.636 9.636L7.05 8.222z'/%3E%3C/svg%3E");
+  background-position: right 0.3em center;
+  background-repeat: no-repeat;
+  background-size: 1em;
   align-items: center;
   padding-right: 1.85em;
   display: inline-flex;
+}
+
+.dark select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' viewBox='0 0 24 24'%3E%3Cpath fill='%23e2e8f0' d='m12 13.171l4.95-4.95l1.414 1.415L12 16L5.636 9.636L7.05 8.222z'/%3E%3C/svg%3E");
 }
 
 /* Disable the browser's default cross-fade; the JS-animated clip-path
@@ -420,5 +409,58 @@ select {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Skip to content link for keyboard accessibility */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 100;
+  padding: 0.75rem 1.5rem;
+  background: var(--earthquake-primary);
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 0.5rem 0;
+}
+
+.skip-to-content:focus {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: auto;
+  height: auto;
+  overflow: visible;
+}
+
+/* Reading progress bar */
+.reading-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: transparent;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.reading-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--earthquake-primary, #3b82f6);
+  transition: width 0.1s ease-out;
+  box-shadow: 0 0 4px var(--earthquake-primary, #3b82f6);
+}
+
+/* Hide progress bar when user prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .reading-progress-fill {
+    transition: none;
   }
 }

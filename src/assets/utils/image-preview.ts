@@ -56,6 +56,21 @@ let cleanupDocumentClick: (() => void) | undefined;
 let cleanupKeyboard: (() => void) | undefined;
 let unlockPreviewPageScroll: (() => void) | undefined;
 
+// AbortController for the current image load listener pair.
+// renderPreview reassigns img.src on every switch; changing src cancels the
+// pending request so the old load/error events never fire, which means the
+// old onLoaded closure would otherwise linger forever (referencing
+// elements.root). Aborting on each render keeps listeners bounded to one pair.
+let imageLoadAbort: AbortController | null = null;
+
+// Rail DOM cache: avoid rebuilding all thumbnails on every switch
+let railCacheKey = "";
+let railThumbButtons: HTMLButtonElement[] = [];
+
+// Focus trap: track the element that opened the preview for focus restoration
+let triggerElement: HTMLElement | null = null;
+let cleanupFocusTrap: (() => void) | undefined;
+
 const readText = (root: Element, selector: string) =>
   root.querySelector(selector)?.textContent?.trim() ?? "";
 
@@ -151,6 +166,51 @@ const unlockPreviewScroll = () => {
   unlockPreviewPageScroll?.();
   unlockPreviewPageScroll = undefined;
   document.documentElement.classList.remove("image-preview-open");
+};
+
+// Focus trap: keep Tab cycling within the preview dialog
+const FOCUSABLE_SELECTOR =
+  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+const installFocusTrap = () => {
+  // Clean up any previously installed trap before installing a new one.
+  // openPreview calls this on every open (e.g. switching images in a gallery),
+  // so without this guard the keydown listener would accumulate.
+  cleanupFocusTrap?.();
+  cleanupFocusTrap = undefined;
+
+  const root = previewElements?.root;
+  if (!root) return;
+
+  const handleKeydown = (event: KeyboardEvent) => {
+    if (event.key !== "Tab" || !previewOpen) return;
+
+    const focusable = Array.from(
+      root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+    ).filter((el) => el.offsetParent !== null);
+
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (event.shiftKey) {
+      if (document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+  };
+
+  root.addEventListener("keydown", handleKeydown);
+  cleanupFocusTrap = () => {
+    root.removeEventListener("keydown", handleKeydown);
+  };
 };
 
 const getGalleryElements = () =>
@@ -307,7 +367,15 @@ const createIconButton = (
     element.type = "button";
   }
 
-  element.innerHTML = `<span class="${icon}" aria-hidden="true"></span>`;
+  // Build the icon span via createElement instead of innerHTML so a malformed
+  // icon class string can never break out into HTML. The icon class comes
+  // from internal constants (icon-[tabler--*] / icon-[simple-icons--*]) so
+  // injection is not realistic today, but defense-in-depth keeps the surface
+  // small if a future contributor wires up a user-controlled icon source.
+  const iconSpan = document.createElement("span");
+  iconSpan.className = icon;
+  iconSpan.setAttribute("aria-hidden", "true");
+  element.append(iconSpan);
   element.addEventListener("click", (event) => {
     if (!href) {
       event.preventDefault();
@@ -325,8 +393,15 @@ const createMetaItem = (icon: string, value: string, href?: string) => {
     : document.createElement("span");
 
   element.className = "earthquake-preview__meta-item";
-  element.innerHTML = `<span class="${icon}" aria-hidden="true"></span><span></span>`;
-  element.querySelector("span:last-child")!.textContent = value;
+
+  // Build via createElement to avoid innerHTML; see createIconButton for
+  // the same reasoning.
+  const iconSpan = document.createElement("span");
+  iconSpan.className = icon;
+  iconSpan.setAttribute("aria-hidden", "true");
+  const valueSpan = document.createElement("span");
+  valueSpan.textContent = value;
+  element.append(iconSpan, valueSpan);
 
   if (href && element instanceof HTMLAnchorElement) {
     element.href = href;
@@ -431,45 +506,62 @@ const renderRail = () => {
     return;
   }
 
-  elements.rail.textContent = "";
-  elements.rail.hidden = previewItems.length <= 1;
+  // Generate a cache key based on item sources to detect if items changed
+  const cacheKey = previewItems.map((item) => item.src).join("|");
 
-  if (previewItems.length <= 1) {
-    return;
-  }
+  if (cacheKey !== railCacheKey || railThumbButtons.length !== previewItems.length) {
+    // Items changed: rebuild rail
+    elements.rail.textContent = "";
+    railThumbButtons = [];
+    railCacheKey = cacheKey;
 
-  const fragment = document.createDocumentFragment();
+    if (previewItems.length <= 1) {
+      elements.rail.hidden = true;
+      return;
+    }
 
-  previewItems.forEach((item, index) => {
-    const button = document.createElement("button");
-    const image = document.createElement("img");
-    const active = index === previewIndex;
+    elements.rail.hidden = false;
+    const fragment = document.createDocumentFragment();
 
-    button.type = "button";
-    button.className = "earthquake-preview__thumb";
-    button.dataset.previewIndex = String(index);
-    button.setAttribute(
-      "aria-label",
-      `${i18n("page.photos.selectPhoto", "Select photo")} ${index + 1}`,
-    );
-    button.setAttribute("aria-current", active ? "true" : "false");
-    button.classList.toggle("is-active", active);
+    previewItems.forEach((item, index) => {
+      const button = document.createElement("button");
+      const image = document.createElement("img");
 
-    image.src = item.thumb || item.src;
-    image.alt = "";
-    image.loading = "lazy";
-    button.append(image);
-    button.addEventListener("click", () => {
-      goToPreview(index);
+      button.type = "button";
+      button.className = "earthquake-preview__thumb";
+      button.dataset.previewIndex = String(index);
+      button.setAttribute(
+        "aria-label",
+        `${i18n("page.photos.selectPhoto", "Select photo")} ${index + 1}`,
+      );
+
+      image.src = item.thumb || item.src;
+      image.alt = "";
+      image.loading = "lazy";
+      button.append(image);
+      button.addEventListener("click", () => {
+        goToPreview(index);
+      });
+
+      railThumbButtons.push(button);
+      fragment.append(button);
     });
 
-    fragment.append(button);
+    elements.rail.append(fragment);
+  }
+
+  // Update active state (lightweight, no DOM rebuild)
+  railThumbButtons.forEach((button, index) => {
+    const active = index === previewIndex;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-current", active ? "true" : "false");
   });
 
-  elements.rail.append(fragment);
-  elements.rail
-    .querySelector<HTMLElement>(".earthquake-preview__thumb.is-active")
-    ?.scrollIntoView({ block: "nearest", inline: "center" });
+  // Scroll active thumb into view
+  const activeThumb = railThumbButtons[previewIndex];
+  if (activeThumb) {
+    activeThumb.scrollIntoView({ block: "nearest", inline: "center" });
+  }
 };
 
 const preloadImage = (src: string) => {
@@ -511,15 +603,22 @@ const renderPreview = () => {
   elements.image.alt = item.alt;
 
   if (elements.image.complete && elements.image.naturalWidth > 0) {
+    imageLoadAbort?.abort();
+    imageLoadAbort = null;
     elements.root.classList.remove("is-loading");
   } else {
+    // Abort any previously registered load/error listener pair so they don't
+    // accumulate across rapid image switches.
+    imageLoadAbort?.abort();
+    imageLoadAbort = new AbortController();
+    const { signal } = imageLoadAbort;
     const onLoaded = () => {
       elements.root.classList.remove("is-loading");
-      elements.image.removeEventListener("load", onLoaded);
-      elements.image.removeEventListener("error", onLoaded);
+      imageLoadAbort?.abort();
+      imageLoadAbort = null;
     };
-    elements.image.addEventListener("load", onLoaded);
-    elements.image.addEventListener("error", onLoaded);
+    elements.image.addEventListener("load", onLoaded, { signal });
+    elements.image.addEventListener("error", onLoaded, { signal });
   }
 
   elements.title.textContent = item.title;
@@ -562,6 +661,29 @@ const closePreview = () => {
   elements.root.classList.remove("is-open");
   unlockPreviewScroll();
 
+  // Abort any pending image load listener so it can't fire after close.
+  imageLoadAbort?.abort();
+  imageLoadAbort = null;
+
+  // Clean up focus trap
+  cleanupFocusTrap?.();
+  cleanupFocusTrap = undefined;
+
+  // Restore focus to the trigger element.
+  // Guard against the trigger having been removed from the DOM (e.g. by SPA
+  // navigation between open and close) — focusing a detached node throws in
+  // some browsers and otherwise silently no-ops; either way we don't want it.
+  if (triggerElement) {
+    if (triggerElement.isConnected) {
+      triggerElement.focus({ preventScroll: true });
+    }
+    triggerElement = null;
+  }
+
+  // Reset rail cache so it rebuilds next time
+  railCacheKey = "";
+  railThumbButtons = [];
+
   if (closeTimer) {
     window.clearTimeout(closeTimer);
   }
@@ -577,6 +699,7 @@ const openPreview = (
   items: PreviewItem[],
   index: number,
   mode: PreviewMode,
+  trigger?: HTMLElement | null,
 ) => {
   const elements = ensurePreviewElements();
 
@@ -584,15 +707,22 @@ const openPreview = (
     return;
   }
 
+  // Clamp index into a valid range. items.length is already > 0 here, so
+  // Math.min never underflows; we still cap the lower bound defensively in
+  // case a future caller passes a negative index that survived the check
+  // above (e.g. via negation overflow on 32-bit platforms).
+  const safeIndex = Math.max(0, Math.min(index, items.length - 1));
+
   if (closeTimer) {
     window.clearTimeout(closeTimer);
     closeTimer = undefined;
   }
 
   previewItems = items;
-  previewIndex = Math.min(index, items.length - 1);
+  previewIndex = safeIndex;
   previewMode = mode;
   previewOpen = true;
+  triggerElement = trigger ?? null;
   elements.root.hidden = false;
   unlockPreviewScroll();
   unlockPreviewPageScroll = lockPageScroll();
@@ -602,6 +732,7 @@ const openPreview = (
   window.requestAnimationFrame(() => {
     elements.root.classList.add("is-open");
     elements.closeButton.focus({ preventScroll: true });
+    installFocusTrap();
   });
 };
 
@@ -631,7 +762,7 @@ const handleDocumentClick = (event: MouseEvent) => {
 
     event.preventDefault();
     event.stopImmediatePropagation();
-    openPreview(items, index, "gallery");
+    openPreview(items, index, "gallery", galleryElement);
     return;
   }
 
@@ -646,7 +777,7 @@ const handleDocumentClick = (event: MouseEvent) => {
 
     event.preventDefault();
     event.stopImmediatePropagation();
-    openPreview([item], 0, "content");
+    openPreview([item], 0, "content", previewElement);
     return;
   }
 
@@ -661,7 +792,7 @@ const handleDocumentClick = (event: MouseEvent) => {
 
   event.preventDefault();
   event.stopImmediatePropagation();
-  openPreview(items, index, "content");
+  openPreview(items, index, "content", image as HTMLElement);
 };
 
 const handleKeydown = (event: KeyboardEvent) => {
@@ -732,57 +863,105 @@ const ensurePreviewElements = () => {
   root.setAttribute("role", "dialog");
   root.setAttribute("aria-modal", "true");
   root.setAttribute("aria-label", i18n("page.photos.preview", "Image preview"));
-  root.innerHTML = `
-    <div class="earthquake-preview__backdrop" data-preview-close></div>
-    <div class="earthquake-preview__viewport" data-preview-viewport>
-      <div class="earthquake-preview__counter" data-preview-counter></div>
-      <button class="earthquake-preview__close" type="button" data-preview-close aria-label="${i18n("common.close", "Close")}">
-        <span class="icon-[tabler--x]" aria-hidden="true"></span>
-      </button>
-      <button class="earthquake-preview__nav earthquake-preview__nav--previous" type="button" data-preview-previous aria-label="${i18n("pagination.previous", "Previous")}">
-        <span class="icon-[tabler--chevron-left]" aria-hidden="true"></span>
-      </button>
-      <button class="earthquake-preview__nav earthquake-preview__nav--next" type="button" data-preview-next aria-label="${i18n("pagination.next", "Next")}">
-        <span class="icon-[tabler--chevron-right]" aria-hidden="true"></span>
-      </button>
-      <div class="earthquake-preview__stage" data-preview-stage>
-        <img class="earthquake-preview__image" data-preview-image alt="" />
-      </div>
-      <aside class="earthquake-preview__info" data-preview-info>
-        <h2 class="earthquake-preview__title" data-preview-title></h2>
-        <p class="earthquake-preview__description" data-preview-description></p>
-        <div class="earthquake-preview__meta" data-preview-meta></div>
-        <div class="earthquake-preview__actions" data-preview-actions></div>
-      </aside>
-      <div class="earthquake-preview__rail" data-preview-rail></div>
-    </div>
-  `;
 
+  // Build DOM using createElement instead of innerHTML for better security
+  const backdrop = document.createElement("div");
+  backdrop.className = "earthquake-preview__backdrop";
+  backdrop.dataset.previewClose = "";
+
+  const viewport = document.createElement("div");
+  viewport.className = "earthquake-preview__viewport";
+  viewport.dataset.previewViewport = "";
+
+  const counter = document.createElement("div");
+  counter.className = "earthquake-preview__counter";
+  counter.dataset.previewCounter = "";
+
+  const closeButton = document.createElement("button");
+  closeButton.className = "earthquake-preview__close";
+  closeButton.type = "button";
+  closeButton.dataset.previewClose = "";
+  closeButton.setAttribute("aria-label", i18n("common.close", "Close"));
+  const closeIcon = document.createElement("span");
+  closeIcon.className = "icon-[tabler--x]";
+  closeIcon.setAttribute("aria-hidden", "true");
+  closeButton.append(closeIcon);
+
+  const prevButton = document.createElement("button");
+  prevButton.className = "earthquake-preview__nav earthquake-preview__nav--previous";
+  prevButton.type = "button";
+  prevButton.dataset.previewPrevious = "";
+  prevButton.setAttribute("aria-label", i18n("pagination.previous", "Previous"));
+  const prevIcon = document.createElement("span");
+  prevIcon.className = "icon-[tabler--chevron-left]";
+  prevIcon.setAttribute("aria-hidden", "true");
+  prevButton.append(prevIcon);
+
+  const nextButton = document.createElement("button");
+  nextButton.className = "earthquake-preview__nav earthquake-preview__nav--next";
+  nextButton.type = "button";
+  nextButton.dataset.previewNext = "";
+  nextButton.setAttribute("aria-label", i18n("pagination.next", "Next"));
+  const nextIcon = document.createElement("span");
+  nextIcon.className = "icon-[tabler--chevron-right]";
+  nextIcon.setAttribute("aria-hidden", "true");
+  nextButton.append(nextIcon);
+
+  const stage = document.createElement("div");
+  stage.className = "earthquake-preview__stage";
+  stage.dataset.previewStage = "";
+
+  const image = document.createElement("img");
+  image.className = "earthquake-preview__image";
+  image.dataset.previewImage = "";
+  image.alt = "";
+
+  stage.append(image);
+
+  const info = document.createElement("aside");
+  info.className = "earthquake-preview__info";
+  info.dataset.previewInfo = "";
+
+  const title = document.createElement("h2");
+  title.className = "earthquake-preview__title";
+  title.dataset.previewTitle = "";
+
+  const description = document.createElement("p");
+  description.className = "earthquake-preview__description";
+  description.dataset.previewDescription = "";
+
+  const meta = document.createElement("div");
+  meta.className = "earthquake-preview__meta";
+  meta.dataset.previewMeta = "";
+
+  const actions = document.createElement("div");
+  actions.className = "earthquake-preview__actions";
+  actions.dataset.previewActions = "";
+
+  info.append(title, description, meta, actions);
+
+  const rail = document.createElement("div");
+  rail.className = "earthquake-preview__rail";
+  rail.dataset.previewRail = "";
+
+  viewport.append(counter, closeButton, prevButton, nextButton, stage, info, rail);
+  root.append(backdrop, viewport);
   document.body.append(root);
 
   previewElements = {
     root,
-    viewport: queryRequired<HTMLDivElement>(root, "[data-preview-viewport]"),
-    stage: queryRequired<HTMLDivElement>(root, "[data-preview-stage]"),
-    image: queryRequired<HTMLImageElement>(root, "[data-preview-image]"),
-    title: queryRequired<HTMLHeadingElement>(root, "[data-preview-title]"),
-    description: queryRequired<HTMLParagraphElement>(
-      root,
-      "[data-preview-description]",
-    ),
-    meta: queryRequired<HTMLDivElement>(root, "[data-preview-meta]"),
-    actions: queryRequired<HTMLDivElement>(root, "[data-preview-actions]"),
-    rail: queryRequired<HTMLDivElement>(root, "[data-preview-rail]"),
-    counter: queryRequired<HTMLDivElement>(root, "[data-preview-counter]"),
-    previousButton: queryRequired<HTMLButtonElement>(
-      root,
-      "[data-preview-previous]",
-    ),
-    nextButton: queryRequired<HTMLButtonElement>(root, "[data-preview-next]"),
-    closeButton: queryRequired<HTMLButtonElement>(
-      root,
-      ".earthquake-preview__close",
-    ),
+    viewport,
+    stage,
+    image,
+    title,
+    description,
+    meta,
+    actions,
+    rail,
+    counter,
+    previousButton: prevButton,
+    nextButton,
+    closeButton,
   };
 
   root
@@ -790,15 +969,15 @@ const ensurePreviewElements = () => {
     .forEach((close) => {
       close.addEventListener("click", closePreview);
     });
-  previewElements.previousButton.addEventListener("click", () => {
+  prevButton.addEventListener("click", () => {
     goBy(-1);
   });
-  previewElements.nextButton.addEventListener("click", () => {
+  nextButton.addEventListener("click", () => {
     goBy(1);
   });
-  previewElements.stage.addEventListener("pointerdown", handlePointerDown);
-  previewElements.stage.addEventListener("pointerup", handlePointerUp);
-  previewElements.stage.addEventListener("pointercancel", () => {
+  stage.addEventListener("pointerdown", handlePointerDown);
+  stage.addEventListener("pointerup", handlePointerUp);
+  stage.addEventListener("pointercancel", () => {
     pointerStart = null;
   });
 
@@ -825,7 +1004,18 @@ const destroyImagePreview = () => {
   cleanupKeyboard?.();
   cleanupDocumentClick = undefined;
   cleanupKeyboard = undefined;
+  cleanupFocusTrap?.();
+  cleanupFocusTrap = undefined;
   closePreview();
+  // Clear any pending close timer so its callback can't touch the root after
+  // it has been removed below.
+  if (closeTimer) {
+    window.clearTimeout(closeTimer);
+    closeTimer = undefined;
+  }
+  // Abort any pending image load listener.
+  imageLoadAbort?.abort();
+  imageLoadAbort = null;
   previewElements?.root.remove();
   previewElements = null;
   previewItems = [];
@@ -833,5 +1023,8 @@ const destroyImagePreview = () => {
   previewMode = "content";
   previewOpen = false;
   pointerStart = null;
+  triggerElement = null;
+  railCacheKey = "";
+  railThumbButtons = [];
   unlockPreviewScroll();
 };

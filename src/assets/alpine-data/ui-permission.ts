@@ -7,7 +7,16 @@ interface State {
   fetchUserPermission: () => void;
 }
 
-export default (currentUser: string, permission: string): State => ({
+const resolveCurrentUser = (state: State, currentUser?: string): string | undefined => {
+  if (currentUser !== undefined && currentUser !== "") {
+    return currentUser;
+  }
+
+  const $el = (state as Record<string, unknown>).$el as HTMLElement | undefined;
+  return $el?.dataset?.currentUser;
+};
+
+export default (permission: string, currentUser?: string): State => ({
   userPermission: undefined,
 
   init() {
@@ -15,7 +24,8 @@ export default (currentUser: string, permission: string): State => ({
   },
 
   get shouldDisplay() {
-    if (currentUser === "anonymousUser") {
+    const user = resolveCurrentUser(this, currentUser);
+    if (user === "anonymousUser" || user === undefined || user === "") {
       return false;
     }
 

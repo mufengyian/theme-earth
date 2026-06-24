@@ -78,6 +78,11 @@ spec:
           label: 显示滚动到顶部按钮
           value: true
         - $formkit: checkbox
+          name: show_reading_progress
+          label: 显示阅读进度条
+          value: true
+          help: 在页面顶部显示阅读进度。
+        - $formkit: checkbox
           name: enable_glass_navbar
           id: enable_glass_navbar
           label: 毛玻璃导航栏
@@ -105,12 +110,10 @@ spec:
           options:
             - label: 系统默认
               value: system
-            - label: Roboto
-              value: roboto
-            - label: JetBrains Mono
-              value: jetbrains_mono
-            - label: MiSans
-              value: misans
+            - label: Noto Sans SC 思源黑体简体
+              value: noto_sans_sc
+            - label: Noto Serif SC 思源宋体
+              value: noto_serif_sc
             - label: 落霞孤鹜文楷
               value: lxgw_wenkai
 
@@ -510,4 +513,28 @@ spec:
                           value: normal
                         - label: 图片
                           value: image
+
+    - group: seo
+      label: SEO
+      formSchema:
+        - $formkit: checkbox
+          name: enable_og
+          label: Open Graph 标签
+          value: false
+          help: "启用后输出 og:title / og:description / og:image / og:url 等标签。如果已安装「SEO 工具集」插件，建议关闭以避免重复。"
+        - $formkit: checkbox
+          name: enable_twitter_card
+          label: Twitter Card 标签
+          value: false
+          help: "启用后输出 twitter:card / twitter:title / twitter:description / twitter:image 标签。"
+        - $formkit: checkbox
+          name: enable_canonical
+          label: Canonical URL
+          value: false
+          help: "启用后输出 <link rel=\"canonical\"> 标签，帮助搜索引擎识别规范链接。"
+        - $formkit: checkbox
+          name: enable_json_ld
+          label: JSON-LD 结构化数据
+          value: false
+          help: "启用后输出 BlogPosting 类型的 JSON-LD 结构化数据。如果已安装「SEO 工具集」插件，建议关闭以避免重复。"
 

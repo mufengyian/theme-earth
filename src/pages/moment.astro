@@ -14,13 +14,11 @@ import Layout from "../layouts/Layout.astro";
       <div class="rounded-xl bg-white p-4 dark:bg-slate-800">
         <div
           th:with="content=${moment.spec.content}"
-          x-data="upvote('moment','moment.halo.run','moments')"
+          th:attr="data-moment-name=${moment.metadata.name}"
+          x-data="Object.assign(upvote('moment','moment.halo.run','moments'), { name: $el.dataset.momentName, showComment: true })"
           class="animated fadeIn"
         >
-          <div
-            class="w-full py-5"
-            th:attr="x-data=|{name:'${moment.metadata.name}',showComment:true}|"
-          >
+          <div class="w-full py-5">
             <div class="min-w-0">
               <div class="mb-2 flex items-center gap-2">
                 <span

@@ -1,9 +1,25 @@
 interface UpvoteState {
   upvotedNames: string[];
   init(): void;
-  upvoted(id: string): boolean;
-  handleUpvote(name: string): void;
+  upvoted(id?: string): boolean;
+  handleUpvote(name?: string): void;
 }
+
+const resolveName = (state: UpvoteState, key: string, name?: string): string | undefined => {
+  if (name !== undefined && name !== "") {
+    return name;
+  }
+
+  const $el = (state as Record<string, unknown>).$el as HTMLElement | undefined;
+  if (!$el) {
+    return undefined;
+  }
+
+  return (
+    $el.dataset[`upvote${key.charAt(0).toUpperCase() + key.slice(1)}Name`] ||
+    $el.dataset[`${key}Name`]
+  );
+};
 
 export default (key: string, group: string, plural: string): UpvoteState => ({
   upvotedNames: [],
@@ -18,11 +34,20 @@ export default (key: string, group: string, plural: string): UpvoteState => ({
       this.upvotedNames = [];
     }
   },
-  upvoted(id: string) {
-    return this.upvotedNames.includes(id);
+  upvoted(id?: string) {
+    const target = resolveName(this, key, id);
+    if (!target) {
+      return false;
+    }
+    return this.upvotedNames.includes(target);
   },
-  async handleUpvote(name) {
-    if (this.upvoted(name)) {
+  async handleUpvote(name?: string) {
+    const target = resolveName(this, key, name);
+    if (!target) {
+      return;
+    }
+
+    if (this.upvoted(target)) {
       return;
     }
 
@@ -36,7 +61,7 @@ export default (key: string, group: string, plural: string): UpvoteState => ({
         body: JSON.stringify({
           group,
           plural,
-          name,
+          name: target,
         }),
       },
     ).catch(() => undefined);
@@ -46,7 +71,7 @@ export default (key: string, group: string, plural: string): UpvoteState => ({
       return;
     }
 
-    this.upvotedNames = [...this.upvotedNames, name];
+    this.upvotedNames = [...this.upvotedNames, target];
 
     try {
       localStorage.setItem(
@@ -59,7 +84,7 @@ export default (key: string, group: string, plural: string): UpvoteState => ({
 
     const upvoteNode = Array.from(
       document.querySelectorAll<HTMLElement>(`[data-upvote-${key}-name]`),
-    ).find((node) => node.getAttribute(`data-upvote-${key}-name`) === name);
+    ).find((node) => node.getAttribute(`data-upvote-${key}-name`) === target);
 
     if (!upvoteNode) {
       return;
