@@ -99,7 +99,14 @@ const renderTocList = (nodes: TocHeading[]) => {
 
     link.addEventListener("click", (event) => {
       event.preventDefault();
-      node.element.scrollIntoView({ block: "start", behavior: "smooth" });
+      // Use "auto" (instant) on touch devices to avoid the smooth-scroll
+      // jitter caused by scroll-behavior + scroll-padding-top + scrollIntoView
+      // fighting each other on mobile browsers.
+      const isTouch = window.matchMedia("(hover: none)").matches;
+      node.element.scrollIntoView({
+        block: "start",
+        behavior: isTouch ? "auto" : "smooth",
+      });
       history.pushState(null, "", `#${node.id}`);
       setActiveHeading(node.id);
     });

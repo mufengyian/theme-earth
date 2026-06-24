@@ -6,11 +6,17 @@
 
 html {
   scroll-padding-top: 100px;
-  scroll-behavior: smooth;
   scrollbar-color: rgba(100, 116, 139, 0.55) transparent;
   scrollbar-width: thin;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+}
+
+/* Only enable smooth scroll on devices that handle it well (hover capable = desktop) */
+@media (hover: hover) and (pointer: fine) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 html.dark {

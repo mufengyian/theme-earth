@@ -58,6 +58,13 @@
     border-radius: 0.4rem;
     @apply shadow;
   }
+
+  /* Shiki plugin applies blur(10px) to unrendered code blocks.
+     Override to show plain text immediately (no blur flash). */
+  shiki-code,
+  shiki-code > pre {
+    filter: none !important;
+  }
 }
 
 /* Dark mode prose variable overrides */
