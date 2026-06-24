@@ -16,13 +16,13 @@ spec:
     name: 风观
     website: https://fg.ink
   description: Earth 二开主题，简洁，激进，vibecoding，谨慎使用。
-  logo: /themes/theme-earthquake/assets/images/bg-cover.svg
+  logo: /themes/theme-earthquake/assets/images/logo.png
   homepage: https://github.com/mufengyian/theme-earthquake
   repo: https://github.com/mufengyian/theme-earthquake
   issues: https://github.com/mufengyian/theme-earthquake/issues
   settingName: "theme-earthquake-setting"
   configMapName: "theme-earthquake-configMap"
-  version: 1.0.7
+  version: 1.0.8
   requires: ">=2.22.0"
   license:
     - name: "GPL-3.0"
