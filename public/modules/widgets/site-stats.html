@@ -23,15 +23,11 @@
       </div>
     </div>
   </div>
-  <div th:if="${theme.config.sidebar?.widgets != null}" th:each="w : ${theme.config.sidebar.widgets}" th:with="opt=${w.options}">
-    <div th:if="${w.value == 'site-stats' and opt?.start_date != null}" data-site-start th:attr="data-site-start=${opt.start_date}" class="hidden"></div>
-  </div>
   <script is:inline>
     (function(){
       var el = document.getElementById("site-stats-days");
       if (!el) return;
-      var src = document.querySelector("[data-site-start]");
-      var startDate = src ? src.getAttribute("data-site-start") : (window.siteStartDate || "2024-01-01");
+      var startDate = window.siteStartDate || "2024-01-01";
       var diff = Math.floor((Date.now() - new Date(startDate).getTime()) / 86400000);
       el.textContent = diff > 0 ? diff : 0;
     })();
