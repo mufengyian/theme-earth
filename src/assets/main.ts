@@ -103,16 +103,11 @@ function enhanceCodeBlocks(): void {
 // ── Init ──────────────────────────────────────────────────────────
 
 const init = async () => {
-  applyHljsThemes();
   hljs.highlightAll();
   enhanceCodeBlocks();
   initImagePreview();
   generateToc("content", ".toc", ".toc-container");
   initPjax();
-
-  // Watch <html> class changes for dark/light toggle
-  var mo = new MutationObserver(function() { applyHljsThemes(); hljs.highlightAll(); enhanceCodeBlocks(); });
-  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 };
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
