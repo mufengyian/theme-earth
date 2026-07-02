@@ -59,7 +59,7 @@
             <button type="button" @click="handleUpvote(name)" class="group inline-flex h-full cursor-pointer items-center justify-center gap-1.5 rounded-full px-2 text-gray-500 transition hover:bg-gray-100 hover:text-red-600 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-red-400">
               <span class="icon-[tabler--heart] text-lg" x-show="!upvoted(name)" x-cloak></span>
               <span class="icon-[tabler--heart-filled] text-lg text-red-600" x-show="upvoted(name)" x-cloak></span>
-              <span class="text-sm" th:attr="data-upvote-${kind}-name=${article.metadata.name}" th:text="${article.stats?.upvote ?: 0}"></span>
+              <span class="text-sm" th:attr="data-upvote-post-name=${kind == 'post' ? article.metadata.name : null}, data-upvote-singlepage-name=${kind == 'page' ? article.metadata.name : null}" th:text="${article.stats?.upvote ?: 0}"></span>
             </button>
           </li>
           <li th:if="${haloCommentEnabled}" class="group inline-flex h-full cursor-pointer items-center rounded-full px-2 transition hover:bg-gray-100 dark:hover:bg-slate-700">
