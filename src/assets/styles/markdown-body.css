@@ -1,12 +1,14 @@
 @reference "./tailwind.css";
 
-/* CSS variables for code blocks */
+/* Code block CSS variables (plugin-shiki handles syntax highlighting) */
 :root {
-  --codeblock-bg: #1e1e2e;
+  --codeblock-bg: #2e2e3a;
+  --codeblock-text: #e4e4e7;
 }
 
 .dark {
-  --codeblock-bg: #181825;
+  --codeblock-bg: #18181b;
+  --codeblock-text: #e4e4e7;
 }
 
 /*
@@ -64,31 +66,26 @@
     background-color: var(--earthquake-surface-muted);
   }
 
-  /* Code blocks — Shiki handles syntax, we provide layout + variables */
-  pre.shiki {
-    position: relative;
+  pre {
     padding: 1rem !important;
     border-radius: 0.75rem;
     overflow-x: auto;
     margin: 1.25rem 0;
     line-height: 1.6;
     font-size: 0.875rem;
-    background: var(--codeblock-bg, #1e1e2e) !important;
+    background: var(--codeblock-bg, #2e2e3a) !important;
+    color: var(--codeblock-text, #e4e4e7);
   }
 
 
 
   /* Inline code */
   :not(pre) > code {
-    background-color: rgba(100, 116, 139, 0.15);
+    background-color: rgba(100, 116, 139, 0.12);
     padding: 0.125rem 0.375rem;
     border-radius: 0.25rem;
     font-size: 0.875em;
     border: none;
-  }
-
-  .dark :not(pre) > code {
-    background-color: rgba(148, 163, 184, 0.12);
   }
 
   /* Images in paragraphs */
