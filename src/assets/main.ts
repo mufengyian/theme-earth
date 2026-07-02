@@ -14,6 +14,9 @@ import { initImagePreview } from "./utils/preview-core";
 import { generateToc } from "./utils/toc";
 import { showToast } from "./utils/toast";
 import { initPjax } from "./utils/pjax";
+import hljs from "highlight.js";
+import "highlight.js/styles/atom-one-dark.css";
+
 
 (window as unknown as Record<string, unknown>).showToast = showToast;
 window.Alpine = Alpine;
@@ -24,6 +27,6 @@ Alpine.data("share", share);
 Alpine.data("uiPermission", uiPermission);
 if (document.querySelector("[x-data]")) Alpine.start();
 
-const init = () => { initImagePreview(); generateToc("content", ".toc", ".toc-container"); initPjax(); };
+const init = () => { initImagePreview(); generateToc("content", ".toc", ".toc-container"); hljs.highlightAll(); initPjax(); };
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
 else init();
