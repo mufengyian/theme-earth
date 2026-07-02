@@ -32,21 +32,35 @@ const hljsThemes = import.meta.glob(
   { query: "?inline", eager: false }
 );
 
+const getCurrentCodeTheme = () => {
+  var isDark = document.documentElement.classList.contains("dark");
+  return isDark
+    ? (window.codeThemeDark || "atom-one-dark")
+    : (window.codeThemeLight || "atom-one-light");
+};
+
 const loadHljsTheme = async (theme) => {
-  var name = theme || "atom-one-dark";
+  var name = theme || getCurrentCodeTheme();
   var path = Object.keys(hljsThemes).find(function(k) {
     return k.includes("/" + name + ".css");
   });
   if (path) {
     await hljsThemes[path]();
   }
+};
+
+const applyHljsTheme = async () => {
+  await loadHljsTheme();
   hljs.highlightAll();
 };
 
 const init = async () => {
+  // Listen for scheme changes to switch code theme
+  var mo = new MutationObserver(function() { applyHljsTheme(); });
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
   initImagePreview();
   generateToc("content", ".toc", ".toc-container");
-  await loadHljsTheme(window.codeHighlightTheme);
+  applyHljsTheme();
   hljs.highlightAll();
   initPjax();
 };
