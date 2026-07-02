@@ -1,7 +1,6 @@
 import { rafThrottle } from "./raf";
 import { initImagePreview } from "./preview-core";
 import { generateToc } from "./toc";
-import hljs from "highlight.js";
 
 const MAIN = "main#main-content", LOAD = "pjax-loading", THRESH = 300;
 let fetchCtrl: AbortController | null = null;
