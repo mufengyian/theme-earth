@@ -27,21 +27,26 @@ Alpine.data("share", share);
 Alpine.data("uiPermission", uiPermission);
 if (document.querySelector("[x-data]")) Alpine.start();
 
-const loadHljsTheme = (theme) => {
-  var link = document.getElementById("hljs-theme");
-  if (!link) {
-    link = document.createElement("link");
-    link.id = "hljs-theme";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
+const hljsThemes = import.meta.glob(
+  ["highlight.js/styles/*.css", "!highlight.js/styles/base16*"],
+  { query: "?inline", eager: false }
+);
+
+const loadHljsTheme = async (theme) => {
+  var name = theme || "atom-one-dark";
+  var path = Object.keys(hljsThemes).find(function(k) {
+    return k.includes("/" + name + ".css");
+  });
+  if (path) {
+    await hljsThemes[path]();
   }
-  link.href = "/themes/theme-earthquake/assets/highlight-" + (theme || "atom-one-dark") + ".css";
+  hljs.highlightAll();
 };
 
-const init = () => {
+const init = async () => {
   initImagePreview();
   generateToc("content", ".toc", ".toc-container");
-  loadHljsTheme(window.codeHighlightTheme);
+  await loadHljsTheme(window.codeHighlightTheme);
   hljs.highlightAll();
   initPjax();
 };
