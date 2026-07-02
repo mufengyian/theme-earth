@@ -4,9 +4,8 @@
  * Markdown body styling — uses Tailwind Typography (@tailwindcss/typography)
  * for consistent, readable article content.
  *
- * Code syntax highlighting is handled by the Shiki plugin
- * (https://github.com/halo-sigs/plugin-shiki) which auto-injects
- * <shiki-code> elements with its own CSS. This file only provides
+ * Code syntax highlighting is handled by highlight.js.
+ * This file only provides
  * prose layout + a few custom overrides.
  */
 .markdown-body {
@@ -56,8 +55,7 @@
     background-color: var(--earthquake-surface-muted);
   }
 
-  /* Code blocks: Shiki handles syntax highlighting.
-     Let Shiki's <shiki-code> wrapper control the pre styling. */
+  /* Code blocks: highlight.js handles highlighting. */
   pre {
     padding: 0 !important;
     background: transparent !important;
@@ -81,12 +79,6 @@
     @apply shadow;
   }
 
-  /* Shiki plugin applies blur(10px) to unrendered code blocks.
-     Override to show plain text immediately (no blur flash). */
-  shiki-code,
-  shiki-code > pre {
-    filter: none !important;
-  }
 }
 
 /* Dark mode prose variable overrides */
