@@ -56,13 +56,14 @@
 - **暗色/亮色模式** — 支持跟随系统、手动切换、切换动画
 - **毛玻璃导航栏** — 可配置透明度与模糊度
 - **阅读进度条** — 页面顶部显示阅读进度
-- **代码高亮** — highlight.js 内置，支持 29 种主题，暗色亮色独立配置
+- **代码高亮** — 通过 plugin-shiki 提供 Shiki 高亮，暗色亮色自动跟随
 - **图片预览** — 文章图片点击放大，支持图库模式与 EXIF 信息
 - **SEO** — Open Graph / Twitter Card / JSON-LD / Canonical
 - **国际化** — 支持多语言（当前 zh_CN）
 - **响应式设计** — 桌面端 + 移动端全面适配
 - **站点统计** — 侧边栏显示文章数、评论数、访问量、运行天数
 - **分享功能** — 支持 X / Telegram / QQ / 微信 / 微博 等平台
+- **技术栈** — 基于 Astro 6 + Tailwind CSS 4 + Alpine.js + TypeScript 构建
 
 ## 插件依赖
 
@@ -72,6 +73,7 @@
 |------|------|
 | [plugin-comment-widget](https://github.com/halo-sigs/plugin-comment-widget) | 评论系统 |
 | [plugin-search-widget](https://github.com/halo-sigs/plugin-search-widget) | 搜索功能 |
+| [plugin-shiki](https://github.com/halo-sigs/plugin-shiki) | 代码语法高亮 |
 | [plugin-links](https://github.com/halo-sigs/plugin-links) | 友链页面 |
 | [plugin-photos](https://github.com/halo-sigs/plugin-photos) | 图库页面 |
 | [plugin-moments](https://github.com/halo-sigs/plugin-moments) | 瞬间页面 |
@@ -123,7 +125,7 @@ Halo 后台 → 主题 → 设置 → 侧边栏
 | [Astro](https://astro.build) | 静态站点生成器 |
 | [Tailwind CSS 4](https://tailwindcss.com) | 样式框架 |
 | [Alpine.js](https://alpinejs.dev) | 前端交互 |
-| [highlight.js](https://highlightjs.org) | 代码语法高亮 |
+| [plugin-shiki](https://github.com/halo-sigs/plugin-shiki) | 代码语法高亮（需安装） |
 | [TypeScript](https://typescriptlang.org) | 类型安全 |
 | [Iconify](https://iconify.design) | SVG 图标库 |
 | [OKLCH](https://oklch.com) | 现代色彩空间 |
