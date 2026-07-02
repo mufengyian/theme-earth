@@ -11,6 +11,7 @@
       </th:block>
 
       <th:block th:if="${#lists.isEmpty(widgets)}">
+        <th:block th:replace="~{modules/widgets/site-stats}" />
         <th:block th:replace="~{modules/widgets/popular-posts}" />
         <th:block th:replace="~{modules/widgets/categories}" />
         <th:block th:replace="~{modules/widgets/tags}" />

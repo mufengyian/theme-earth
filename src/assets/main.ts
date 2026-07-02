@@ -4,95 +4,26 @@ import "./styles/markdown-body.css";
 import "./styles/moment.css";
 import "./styles/image-preview.css";
 import Alpine from "alpinejs";
-
 import colorSchemeSwitcher from "./alpine-data/color-scheme-switcher";
 import dropdown from "./alpine-data/dropdown";
 import share from "./alpine-data/share";
 import uiPermission from "./alpine-data/ui-permission";
 import upvote from "./alpine-data/upvote";
 import "./components/number-formatter";
-import { initImagePreview } from "./utils/image-preview";
+import { initImagePreview } from "./utils/preview-core";
 import { generateToc } from "./utils/toc";
 import { showToast } from "./utils/toast";
-import { rafThrottle } from "./utils/raf";
+import { initPjax } from "./utils/pjax";
 
-let headerMenu: HTMLElement | null = null;
-let scrollToTopButton: HTMLElement | null = null;
-let readingProgressBar: HTMLElement | null = null;
-
-// 暴露 toast 到全局供 Alpine 组件使用
 (window as unknown as Record<string, unknown>).showToast = showToast;
-
 window.Alpine = Alpine;
-
 Alpine.data("dropdown", dropdown);
 Alpine.data("colorSchemeSwitcher", colorSchemeSwitcher);
 Alpine.data("upvote", upvote);
 Alpine.data("share", share);
 Alpine.data("uiPermission", uiPermission);
+if (document.querySelector("[x-data]")) Alpine.start();
 
-// 仅当页面存在 Alpine 组件时才启动，避免无交互页面浪费开销
-if (document.querySelector("[x-data]")) {
-  Alpine.start();
-}
-
-const handleScroll = () => {
-  if (window.scrollY > 0) {
-    headerMenu?.classList.add("menu-sticky");
-  } else {
-    headerMenu?.classList.remove("menu-sticky");
-  }
-
-  if (scrollToTopButton) {
-    const visible = window.scrollY > 300;
-    scrollToTopButton.style.opacity = visible ? "1" : "0";
-    scrollToTopButton.style.pointerEvents = visible ? "auto" : "none";
-  }
-
-  if (readingProgressBar) {
-    const fill = readingProgressBar.querySelector('.reading-progress-fill') as HTMLElement;
-    if (fill) {
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      
-      if (docHeight <= 0) {
-        fill.style.width = '0%';
-      } else {
-        const progress = Math.min(100, (scrollTop / docHeight) * 100);
-        fill.style.width = `${progress}%`;
-      }
-    }
-  }
-};
-
-const throttledScroll = rafThrottle(handleScroll);
-
-const initScrollToTopButton = () => {
-  if (!scrollToTopButton) {
-    return;
-  }
-
-  scrollToTopButton.addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-};
-
-const initPageInteractions = () => {
-  headerMenu = document.getElementById("header-menu");
-  scrollToTopButton = document.getElementById("btn-scroll-to-top");
-  readingProgressBar = document.getElementById("reading-progress-bar");
-  initScrollToTopButton();
-  initImagePreview();
-  generateToc("content", ".toc", ".toc-container");
-  handleScroll();
-};
-
-window.addEventListener("scroll", throttledScroll, { passive: true });
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initPageInteractions, {
-    once: true,
-  });
-} else {
-  initPageInteractions();
-}
+const init = () => { initImagePreview(); generateToc("content", ".toc", ".toc-container"); initPjax(); };
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
+else init();

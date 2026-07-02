@@ -1,0 +1,102 @@
+<th:fragment="article-layout(article, kind, tocMode, showSidebar, postDisplay, shareIds)">
+  <section id="app" class="main detail-sidebar-layout mx-auto flex max-w-7xl flex-col px-4 lg:flex-row"
+    th:with="titleOnCover = ${(theme.config.post.title_position ?: 'content') == 'cover' and not #strings.isEmpty(article.spec.cover)}, safeToc = ${tocMode ?: 'both'}">
+    <div th:if="${kind == 'post' and (safeToc == 'left' or safeToc == 'both')}" class="toc-container detail-toc-desktop hidden pt-12 xl:block xl:w-56 xl:shrink-0 xl:pr-4 xl:pt-16">
+      <div class="sticky top-24 rounded-xl border border-gray-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="mb-3 inline-flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-slate-50">
+          <span class="icon-[tabler--list-tree] text-lg text-blue-500"></span>
+          <span th:text="#{page.post.toc}"></span>
+        </div>
+        <div class="toc"></div>
+      </div>
+    </div>
+    <div class="content-wrapper post-detail animated fadeIn min-w-0 pt-12 lg:flex-1 lg:px-6 lg:pb-8 lg:pt-16"
+      th:classappend="${kind == 'page' and showSidebar ? ' lg:w-3/4' : (kind == 'page' and !showSidebar ? ' lg:w-full lg:max-w-4xl lg:mx-auto' : '')}"
+      th:attr="data-post-name=${kind == 'post' ? article.metadata.name : null}, data-singlepage-name=${kind == 'page' ? article.metadata.name : null}, data-share-ids=${shareIds != null ? #strings.listJoin(shareIds, ',') : ''}"
+      x-data="Object.assign(upvote('${kind == 'post' ? 'post' : 'singlepage'}','content.halo.run','${kind == 'post' ? 'posts' : 'singlepages'}'), share($el.dataset.shareIds ? $el.dataset.shareIds.split(',') : []), { name: $el.dataset.postName || $el.dataset.singlepageName })">
+      <div th:unless="${titleOnCover}" class="flex flex-wrap items-center justify-between gap-2">
+        <h1 class="break-all text-3xl font-bold text-gray-900 dark:text-slate-50" th:text="${article.spec.title}"></h1>
+        <div sec:authorize="isAuthenticated()" th:attr="data-current-user=${#authentication.name}" x-data="uiPermission('${kind == 'post' ? 'system:posts:manage' : 'system:singlepages:manage'}', $el.dataset.currentUser)">
+          <template x-if="shouldDisplay">
+            <a th:href="|/console/${kind == 'post' ? 'posts/editor' : 'single-pages/editor'}?name=${article.metadata.name}&returnToView=true|" class="inline-flex size-9 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100" th:title="#{common.edit}"><span class="icon-[tabler--edit] text-xl"></span></a>
+          </template>
+        </div>
+      </div>
+      <div th:if="${postDisplay.categories or postDisplay.visit or postDisplay.publish_time}" class="my-4 flex flex-wrap items-center justify-between gap-4 lg:my-8">
+        <div class="flex flex-wrap items-center gap-4">
+          <div th:if="${kind == 'post' and postDisplay.categories and not #lists.isEmpty(article.categories)}" class="inline-flex items-center gap-1.5">
+            <div class="icon-[tabler--archive] text-gray-500"></div>
+            <a th:each="cat : ${article.categories}" th:href="@{${cat.status.permalink}}" th:title="${cat.spec.displayName}" th:text="${cat.spec.displayName}" class="text-sm font-light text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-50"></a>
+          </div>
+          <div class="inline-flex items-center gap-1.5" th:if="${postDisplay.visit and article.stats != null}">
+            <div class="icon-[tabler--eye] text-gray-500"></div>
+            <span class="text-sm font-light text-gray-500 dark:text-slate-400" th:text="${article.stats?.visit ?: 0}"></span>
+          </div>
+        </div>
+        <div th:if="${postDisplay.publish_time}" class="text-sm font-light text-gray-500 dark:text-slate-400" th:title="${article.spec.publishTime}" th:text="${#temporals.format(article.spec.publishTime, 'yyyy-MM-dd')}"></div>
+      </div>
+      <div th:if="${not #strings.isEmpty(article.spec.cover)}" th:style="|--cover-height: ${theme.config.post.cover_height ?: '24rem'};|" class="post-feature-image relative mx-auto my-4 w-full overflow-hidden rounded-lg" th:classappend="${titleOnCover ? ' h-[var(--cover-height)]' : ''}">
+        <img class="w-full" th:classappend="${titleOnCover ? ' h-full object-cover' : ' rounded-lg'}" th:src="${article.spec.cover}" th:alt="${article.spec.title}" th:srcset="|${thumbnail.gen(article.spec.cover, 's')} 400w, ${thumbnail.gen(article.spec.cover, 'm')} 800w, ${thumbnail.gen(article.spec.cover, 'l')} 1200w, ${thumbnail.gen(article.spec.cover, 'xl')} 1600w|" sizes="(max-width: 1600px) 100vw, 1600px" decoding="async" />
+        <div th:if="${titleOnCover}" class="absolute inset-0 flex items-end bg-gradient-to-t from-black/70 via-black/20 to-transparent p-5 sm:p-8">
+          <h1 class="break-all text-3xl font-bold text-white drop-shadow" th:text="${article.spec.title}"></h1>
+        </div>
+      </div>
+      <div th:if="${kind == 'post' and (safeToc == 'inline' or safeToc == 'both')}" class="toc-container my-5 rounded-xl border border-gray-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 xl:hidden" th:attr="x-data=|{ tocOpen: ${theme.config.post.expand_inline_toc ?: false} }|">
+        <button type="button" class="flex w-full items-center justify-between gap-3 text-left" @click="tocOpen = !tocOpen" :aria-expanded="tocOpen.toString()">
+          <span class="inline-flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-slate-50"><span class="icon-[tabler--list-tree] text-lg text-blue-500"></span><span th:text="#{page.post.toc}"></span></span>
+          <span class="icon-[tabler--chevron-down] text-lg text-gray-400 transition-transform dark:text-slate-500" :class="tocOpen ? 'rotate-180' : ''"></span>
+        </button>
+        <div class="toc mt-3" x-show="tocOpen" x-cloak></div>
+      </div>
+      <article id="content" class="markdown-body !max-w-none break-all py-4" th:utext="${article.content.content}"></article>
+      <div th:if="${kind == 'post' and postDisplay.tags and not #lists.isEmpty(article.tags)}" class="my-4 flex flex-wrap items-center gap-1.5">
+        <div class="icon-[tabler--hash] text-gray-500"></div>
+        <a th:each="tag : ${article.tags}" th:href="${tag.status.permalink}" th:title="${tag.spec.displayName}" class="inline-flex items-center gap-x-1.5 rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-700 transition hover:bg-purple-200 dark:bg-purple-500/20 dark:text-purple-200 dark:hover:bg-purple-500/30"><th:block th:text="|#${tag.spec.displayName}|"></th:block><sup th:text="${tag.postCount ?: 0}"></sup></a>
+      </div>
+      <div th:if="${postDisplay.upvote or haloCommentEnabled or postDisplay.share}" class="sticky bottom-10 z-10 flex items-center justify-center">
+        <ul class="flex h-12 items-center gap-2 rounded-full border border-gray-200 bg-white px-2 py-1.5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+          <li th:if="${postDisplay.upvote}" class="inline-flex h-full">
+            <button type="button" @click="handleUpvote(name)" class="group inline-flex h-full cursor-pointer items-center justify-center gap-1.5 rounded-full px-2 text-gray-500 transition hover:bg-gray-100 hover:text-red-600 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-red-400">
+              <span class="icon-[tabler--heart] text-lg" x-show="!upvoted(name)" x-cloak></span>
+              <span class="icon-[tabler--heart-filled] text-lg text-red-600" x-show="upvoted(name)" x-cloak></span>
+              <span class="text-sm" th:attr="data-upvote-${kind}-name=${article.metadata.name}" th:text="${article.stats?.upvote ?: 0}"></span>
+            </button>
+          </li>
+          <li th:if="${haloCommentEnabled}" class="group inline-flex h-full cursor-pointer items-center rounded-full px-2 transition hover:bg-gray-100 dark:hover:bg-slate-700">
+            <a class="inline-flex size-full items-center justify-center gap-1.5 text-gray-500 transition group-hover:text-indigo-500 dark:text-slate-400 dark:group-hover:text-indigo-300" href="#article-comment">
+              <div class="icon-[tabler--message-circle] text-lg"></div>
+              <span class="text-sm" th:text="${article.stats?.comment ?: 0}"></span>
+            </a>
+          </li>
+          <li th:if="${postDisplay.share}" class="group inline-flex h-full cursor-pointer items-center justify-center gap-1.5 rounded-full px-2 text-gray-500 transition hover:bg-gray-100 hover:text-green-600 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-green-400" @click="shareModal = true">
+            <div class="icon-[tabler--share] text-lg"></div>
+          </li>
+        </ul>
+      </div>
+      <div th:if="${kind == 'post' and postDisplay.navigation}" th:with="postCursor = ${theme.config.post.navigation_scope == 'category' and #halo.matchVersion('>=2.25.0') ? postFinder.cursorByCategory(article.metadata.name) : postFinder.cursor(article.metadata.name)}" class="flex justify-between py-8">
+        <div class="w-1/2 pr-4">
+          <a th:if="${postCursor.hasPrevious()}" th:href="@{${postCursor.previous.status.permalink}}" th:title="${postCursor.previous.spec.title}">
+            <div class="inline-flex items-center gap-1 border-b-2 border-b-transparent text-sm text-gray-700 transition hover:border-gray-900 hover:text-gray-900 dark:text-slate-300 dark:hover:border-slate-50 dark:hover:text-slate-50">
+              <i class="icon-[tabler--arrow-left] inline-block flex-none"></i>
+              <span class="flex-1 shrink break-all" th:text="${postCursor.previous.spec.title}"></span>
+            </div>
+          </a>
+        </div>
+        <div class="w-1/2 pl-4 text-right">
+          <a th:if="${postCursor.hasNext()}" th:href="@{${postCursor.next.status.permalink}}" th:title="${postCursor.next.spec.title}">
+            <div class="inline-flex items-center gap-1 border-b-2 border-b-transparent text-sm text-gray-700 transition hover:border-gray-900 hover:text-gray-900 dark:text-slate-300 dark:hover:border-slate-50 dark:hover:text-slate-50">
+              <span class="flex-1 shrink break-all" th:text="${postCursor.next.spec.title}"></span>
+              <i class="icon-[tabler--arrow-right] inline-block flex-none"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div id="article-comment" class="comment-widget" th:if="${haloCommentEnabled}">
+        <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-slate-50" th:text="#{common.comment}"></h2>
+        <halo:comment group="content.halo.run" th:attr="name=${article.metadata.name}, kind=${kind == 'post' ? 'Post' : 'SinglePage'}"></halo:comment>
+      </div>
+      <div th:if="${postDisplay.share}"><th:block th:replace="~{modules/share-modal}"></th:block></div>
+    </div>
+    <th:block th:if="${kind == 'page' ? showSidebar : true}"><th:block th:replace="~{modules/sidebar :: sidebar(prepend = null)}"></th:block></th:block>
+  </section>
+</th:fragment>

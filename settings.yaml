@@ -337,6 +337,8 @@ spec:
               options:
                 - label: 站点资料
                   value: profile
+                - label: 站点统计
+                  value: site-stats
                 - label: 热门文章
                   value: popular-posts
                 - label: 文章分类

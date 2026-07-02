@@ -1,49 +1,31 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Share QR Code</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        background-color: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-      }
-
-      canvas {
-        width: 300px;
-        height: 300px;
-      }
-    </style>
-  </head>
-  <body>
-    <canvas id="canvas"></canvas>
-    <script src="./js/qrious.min.js"></script>
-    <script>
-      (function () {
-        var rawUrl =
-          new URLSearchParams(window.location.search).get("url") || "";
-        var url = "";
-        try {
-          url = new URL(rawUrl).href;
-        } catch (e) {
-          try {
-            url = new URL(rawUrl, window.location.origin).href;
-          } catch (e2) {
-            return;
-          }
-        }
-        new QRious({
-          element: document.getElementById("canvas"),
-          value: url,
-          size: 260,
-        });
-      })();
-    </script>
-  </body>
-</html>
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>QR Code</title>
+<style>body{margin:0;padding:0;background:#fff;display:flex;align-items:center;justify-content:center;height:100vh}canvas{width:300px;height:300px}#hint{position:fixed;bottom:20px;left:0;right:0;text-align:center;font-family:-apple-system,sans-serif;font-size:13px;color:#999}</style>
+</head><body><canvas id="c"></canvas><p id="hint">Scan with WeChat</p>
+<script>(function(){var u=new URLSearchParams(location.search).get("url")||"";try{u=new URL(u).href}catch(e){try{u=new URL(u,location.origin).href}catch(e2){return}}
+function G(){var e=new Array(512),l=new Array(256),v=1;for(var i=0;i<255;i++){e[i]=v;l[v]=i;v=(v<<1)^(v>=128?0x11d:0)}for(i=255;i<512;i++)e[i]=e[i-255];return{exp:e,log:l}}var g=G();
+function RS(n,k){var b=new Array(n+1);b[n]=1;for(var i=n-1;i>=0;i--){var p=b.slice();for(var j=0;j<=n;j++)b[j]=p[j+1]!==undefined?g.exp[(g.log[p[j+1]]+i)%255]^(j>0?p[j-1]:0):(j>0?p[j-1]:0)}this.gen=b;this.encode=function(d){var r=d.slice();for(var i=0;i<d.length;i++)if(r[i]!==0){var f=g.log[r[i]];for(var j=0;j<=n;j++){var x=i+j;if(x<r.length)r[x]^=g.exp[(f+this.gen[j])%255]}}return r.slice(d.length)}}
+function encodeStr(s){var b=[];for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);if(c<128)b.push(c);else if(c<2048){b.push(192|(c>>6));b.push(128|(c&63))}else{b.push(224|(c>>12));b.push(128|((c>>6)&63));b.push(128|(c&63))}}return b}
+var V={1:{s:21,t:26,d:16},2:{s:25,t:44,d:28},3:{s:29,t:70,d:44},4:{s:33,t:100,d:64},5:{s:37,t:134,d:86},6:{s:41,t:172,d:108}};
+function getV(n){for(var v=1;v<=6;v++)if(n+3<=V[v].d*8-4)return v;return 6}
+var bytes=encodeStr(u),ver=getV(bytes.length),info=V[ver],size=info.s;
+var bits=[];function pb(v,c){for(var i=c-1;i>=0;i--)bits.push((v>>i)&1)}
+pb(64,4);pb(bytes.length,8);for(var i=0;i<bytes.length;i++)pb(bytes[i],8);
+var rem=info.d*8-bits.length;if(rem>4)rem=4;for(i=0;i<rem;i++)bits.push(0);
+while(bits.length%8!==0)bits.push(0);
+var pad=[0xec,0x11],pi=0;while(bits.length/8<info.d){pb(pad[pi%2],8);pi++}
+var cw=[];for(i=0;i<bits.length;i+=8){var w=0;for(j=0;j<8;j++)w=(w<<1)|(bits[i+j]||0);cw.push(w)}
+var enc=[],ec=[];for(var b=0;b<info.t/info.d;b++){var rs=new RS(info.t-info.d,info.d);var db=cw.slice(b*info.d,(b+1)*info.d);while(db.length<info.d)db.push(0);enc=enc.concat(db);ec=ec.concat(rs.encode(db))}
+var all=cw.concat(ec);
+var mod=[];for(i=0;i<size;i++){mod[i]=[];for(j=0;j<size;j++)mod[i][j]=null}
+function f7(r,c){for(var x=-1;x<=7;x++)for(var y=-1;y<=7;y++){var i=r+x,j=c+y;if(i<0||i>=size||j<0||j>=size)continue;if(x>=0&&x<=6&&y>=0&&y<=6){var inner=x>=1&&x<=5&&y>=1&&y<=5,ct=x==3&&y==3;mod[i][j]=inner&&!ct?0:1}else mod[i][j]=0}}
+f7(0,0);f7(0,size-7);f7(size-7,0);
+for(i=8;i<size-8;i++){if(mod[6][i]===null)mod[6][i]=i%2===0?1:0;if(mod[i][6]===null)mod[i][6]=i%2===0?1:0}
+mod[size-8][8]=1;
+var bi=0;for(var col=size-1;col>=1;col-=2){if(col===6)col=5;for(var r=0;r<size;r++){for(var cc=0;cc<2;cc++){var rr=(col%4===1)?size-1-r:r;var cc2=col-cc;if(rr<0||rr>=size||cc2<0)continue;if(mod[rr][cc2]===null){mod[rr][cc2]=bi<all.length*8?((all[bi>>3]>>(7-(bi&7)))&1):0;bi++}}}}
+for(i=0;i<size;i++)for(j=0;j<size;j++)if(mod[i][j]===0||mod[i][j]===1)if((i+j)%2===0)mod[i][j]=mod[i][j]===1?0:1;
+var canvas=document.getElementById("c"),ctx=canvas.getContext("2d"),scale=3;canvas.width=size*scale;canvas.height=size*scale;
+ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle="#000";
+for(i=0;i<size;i++)for(j=0;j<size;j++)if(mod[i][j]===1)ctx.fillRect(j*scale,i*scale,scale,scale)})();
+</script></body></html>
