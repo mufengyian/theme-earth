@@ -22,17 +22,14 @@
         <div class="mt-0.5 text-xs text-gray-500 dark:text-slate-400" th:text="#{widget.siteStats.days}"></div>
       </div>
     </div>
+    <div th:if="${theme.config.widgets?.site_stats?.start_date != null}" data-site-start th:attr="data-site-start=${theme.config.widgets.site_stats.start_date}" class="hidden"></div>
   </div>
   <script is:inline>
     (function(){
       var el = document.getElementById("site-stats-days");
       if (!el) return;
-      var startDate = "2024-01-01";
-      try {
-        var s = document.querySelector("[data-site-start]");
-        if (s) startDate = s.getAttribute("data-site-start");
-        else if (window.siteStartDate) startDate = window.siteStartDate;
-      } catch(e) {}
+      var el2 = document.querySelector("[data-site-start]");
+      var startDate = el2 ? el2.getAttribute("data-site-start") : (window.siteStartDate || "2024-01-01");
       var diff = Math.floor((Date.now() - new Date(startDate).getTime()) / 86400000);
       el.textContent = diff > 0 ? diff : 0;
     })();
