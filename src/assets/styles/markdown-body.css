@@ -109,4 +109,6 @@
   --tw-prose-quote-borders: var(--earthquake-border);
   --tw-prose-code: var(--earthquake-text);
   --tw-prose-pre-bg: var(--earthquake-surface-muted);
+  --tw-prose-th-borders: var(--earthquake-border);
+  --tw-prose-td-borders: var(--earthquake-border);
 }
