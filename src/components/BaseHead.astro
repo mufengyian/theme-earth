@@ -208,13 +208,6 @@
   crossorigin
 />
 
-<!-- Shiki: CDN preconnect + warmup code block -->
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-<link rel="preconnect" href="https://esm.sh" crossorigin />
-<!-- Hidden warmup: triggers Shiki engine load early so visible
-     code blocks render instantly when user scrolls to them. -->
-<link rel="preconnect" href="https://fastly.jsdelivr.net" crossorigin />
-<link rel="preconnect" href="https://g.alicdn.com" crossorigin />
 
 <!-- Color scheme init: blocking inline script to prevent FOUC -->
 <script is:inline th:inline="javascript">
