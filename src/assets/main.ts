@@ -29,8 +29,6 @@ if (document.querySelector("[x-data]")) Alpine.start();
 // ── Init ──────────────────────────────────────────────────────────
 
 const init = async () => {
-  shikiReady();
-  await shikiHighlight();
   initImagePreview();
   generateToc("content", ".toc", ".toc-container");
   initPjax();
