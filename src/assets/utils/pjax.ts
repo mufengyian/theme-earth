@@ -1,4 +1,3 @@
-import { highlightAll as shikiHighlight } from "./shiki";
 import { rafThrottle } from "./raf";
 import { initImagePreview } from "./preview-core";
 import { generateToc } from "./toc";
@@ -35,7 +34,7 @@ async function nav(url: string, push: boolean) {
     if (push) history.pushState({ url }, "", url);
     window.scrollTo(0, 0);
     initImagePreview(); generateToc("content", ".toc", ".toc-container");
-    shikiHighlight();
+    
     bindScroll();
     const m = document.querySelector(MAIN);
     if (m && (window as any).Alpine?.initTree) (window as any).Alpine.initTree(m);
