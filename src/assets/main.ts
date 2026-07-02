@@ -26,15 +26,10 @@ Alpine.data("uiPermission", uiPermission);
 
 if (document.querySelector("[x-data]")) Alpine.start();
 
-// ── Init ──────────────────────────────────────────────────────────
-
 const init = async () => {
   initImagePreview();
   generateToc("content", ".toc", ".toc-container");
   initPjax();
-
-  
-  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 };
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
