@@ -31,6 +31,11 @@ if (document.querySelector("[x-data]")) Alpine.start();
 
 function enhanceCodeBlocks(): void {
   document.querySelectorAll("pre.shiki:not([data-enhanced])").forEach(function(pre) {
+    // Skip if already wrapped (Shiki re-render replaces pre inside existing wrapper)
+    if (pre.parentElement?.classList.contains("code-block-wrapper")) {
+      pre.setAttribute("data-enhanced", "true");
+      return;
+    }
     pre.setAttribute("data-enhanced", "true");
 
     var wrapper = document.createElement("div");
