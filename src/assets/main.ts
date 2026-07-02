@@ -14,8 +14,8 @@ import { initImagePreview } from "./utils/preview-core";
 import { generateToc } from "./utils/toc";
 import { showToast } from "./utils/toast";
 import { initPjax } from "./utils/pjax";
+
 import hljs from "highlight.js";
-import "highlight.js/styles/atom-one-dark.css";
 
 
 (window as unknown as Record<string, unknown>).showToast = showToast;
@@ -27,6 +27,23 @@ Alpine.data("share", share);
 Alpine.data("uiPermission", uiPermission);
 if (document.querySelector("[x-data]")) Alpine.start();
 
-const init = () => { initImagePreview(); generateToc("content", ".toc", ".toc-container"); hljs.highlightAll(); initPjax(); };
+const loadHljsTheme = (theme) => {
+  var link = document.getElementById("hljs-theme");
+  if (!link) {
+    link = document.createElement("link");
+    link.id = "hljs-theme";
+    link.rel = "stylesheet";
+    document.head.appendChild(link);
+  }
+  link.href = "/themes/theme-earthquake/assets/highlight-" + (theme || "atom-one-dark") + ".css";
+};
+
+const init = () => {
+  initImagePreview();
+  generateToc("content", ".toc", ".toc-container");
+  loadHljsTheme(window.codeHighlightTheme);
+  hljs.highlightAll();
+  initPjax();
+};
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
 else init();
