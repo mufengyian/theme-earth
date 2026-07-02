@@ -130,6 +130,50 @@ spec:
           options:
             - label: 默认
               value: earthquake
+            - label: 天蓝色
+              value: aqua
+            - label: 靛蓝色
+              value: indigo
+            - label: 青绿色
+              value: teal
+            - label: 翡翠绿
+              value: emerald
+            - label: 墨绿色
+              value: forest
+            - label: 柠檬黄
+              value: bumblebee
+            - label: 暖橙色
+              value: orange
+            - label: 焦糖棕
+              value: retro
+            - label: 樱花粉
+              value: cupcake
+            - label: 玫红色
+              value: rose
+            - label: 紫罗兰
+              value: pastel
+            - label: 暗夜
+              value: dark
+            - label: 深邃黑
+              value: night
+            - label: 极简灰
+              value: dim
+            - label: 纯黑
+              value: black
+            - label: 深渊
+              value: abyss
+            - label: 合成波
+              value: synthwave
+            - label: 万圣节
+              value: halloween
+            - label: 奢华
+              value: luxury
+            - label: 德古拉
+              value: dracula
+            - label: 咖啡
+              value: coffee
+            - label: 日落
+              value: sunset
         - $formkit: select
           name: code_theme_light
           label: 亮色模式代码高亮主题
