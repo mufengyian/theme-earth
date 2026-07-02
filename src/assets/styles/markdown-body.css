@@ -57,11 +57,13 @@
 
   /* Code blocks: highlight.js handles highlighting. */
   pre {
-    padding: 0 !important;
-    background: transparent !important;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
 
     code {
       border: none;
+      background: transparent !important;
     }
   }
 
