@@ -130,6 +130,68 @@ spec:
           options:
             - label: 默认
               value: earthquake
+        - $formkit: select
+          name: code_theme
+          label: 代码块高亮主题
+          value: atom-one-dark
+          help: 修改后需重新构建主题生效
+          options:
+            - label: Atom One Dark
+              value: atom-one-dark
+            - label: Atom One Light
+              value: atom-one-light
+            - label: GitHub
+              value: github
+            - label: GitHub Dark
+              value: github-dark
+            - label: GitHub Dark Dimmed
+              value: github-dark-dimmed
+            - label: VS Code
+              value: vs
+            - label: VS Code 2015 Dark
+              value: vs2015
+            - label: Xcode
+              value: xcode
+            - label: Monokai
+              value: monokai
+            - label: Monokai Sublime
+              value: monokai-sublime
+            - label: Nord
+              value: nord
+            - label: Night Owl
+              value: night-owl
+            - label: Dracula
+              value: dracula
+            - label: Tokyo Night Dark
+              value: tokyo-night-dark
+            - label: Tokyo Night Light
+              value: tokyo-night-light
+            - label: One Dark Pro
+              value: atom-one-dark-reasonable
+            - label: Panda Syntax Dark
+              value: panda-syntax-dark
+            - label: Panda Syntax Light
+              value: panda-syntax-light
+            - label: Rose Pine
+              value: rose-pine
+            - label: Rose Pine Moon
+              value: rose-pine-moon
+            - label: Rose Pine Dawn
+              value: rose-pine-dawn
+            - label: Stack Overflow Dark
+              value: stackoverflow-dark
+            - label: Stack Overflow Light
+              value: stackoverflow-light
+            - label: Shades of Purple
+              value: shades-of-purple
+            - label: Gradient Dark
+              value: gradient-dark
+            - label: Gradient Light
+              value: gradient-light
+            - label: A11y Dark
+              value: a11y-dark
+            - label: A11y Light
+              value: a11y-light
             - label: 天蓝色
               value: aqua
             - label: 靛蓝色
