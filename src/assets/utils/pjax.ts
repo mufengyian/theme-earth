@@ -30,6 +30,7 @@ async function nav(url: string, push: boolean) {
     const cm = document.querySelector<HTMLElement>(MAIN);
     if (!nm || !cm) throw new Error("main not found");
     cm.replaceWith(nm);
+    nm.addEventListener("click", onClick);
     if (doc.title) document.title = doc.title;
     if (push) history.pushState({ url }, "", url);
     window.scrollTo(0, 0);
