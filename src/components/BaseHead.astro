@@ -208,24 +208,13 @@
   crossorigin
 />
 
-<!-- Shiki warmup: preload CDN + force early engine load -->
+<!-- Shiki: CDN preconnect + warmup code block -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link rel="preconnect" href="https://esm.sh" crossorigin />
-<th:block th:if="${pluginFinder.available('PluginShiki')}">
-  <script is:inline>
-    (function() {
-      // Pre-warm: find the shiki script and import it early so the
-      // engine, grammars, and themes are cached before user scrolls
-      // to code blocks.
-      var shikiScript = document.querySelector('script[src*="shiki-code"]');
-      if (shikiScript) {
-        var src = shikiScript.getAttribute('src');
-        // Dynamic import forces early fetching of the module + all deps
-        import(src).catch(function(){});
-      }
-    })();
-  </script>
-</th:block>
+<!-- Hidden warmup: triggers Shiki engine load early so visible
+     code blocks render instantly when user scrolls to them. -->
+<link rel="preconnect" href="https://fastly.jsdelivr.net" crossorigin />
+<link rel="preconnect" href="https://g.alicdn.com" crossorigin />
 
 <!-- Color scheme init: blocking inline script to prevent FOUC -->
 <script is:inline th:inline="javascript">
