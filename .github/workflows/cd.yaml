@@ -30,7 +30,7 @@ jobs:
           version: 11.8.0
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build theme
         run: pnpm build
