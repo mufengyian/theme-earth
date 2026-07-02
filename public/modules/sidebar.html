@@ -11,7 +11,6 @@
       </th:block>
 
       <th:block th:if="${#lists.isEmpty(widgets)}">
-        <th:block th:replace="~{modules/widgets/site-stats}" />
         <th:block th:replace="~{modules/widgets/popular-posts}" />
         <th:block th:replace="~{modules/widgets/categories}" />
         <th:block th:replace="~{modules/widgets/tags}" />
@@ -20,8 +19,7 @@
       <th:block th:unless="${#lists.isEmpty(widgets)}">
         <th:block th:each="widget : ${widgets}">
           <th:block th:switch="${widget.value}">
-            <th:block th:case="site-stats" th:replace="~{modules/widgets/site-stats}" />
-            <th:block th:case="popular-posts" th:replace="~{modules/widgets/popular-posts}" />
+  <th:block th:case="popular-posts" th:replace="~{modules/widgets/popular-posts}" />
             <th:block th:case="categories" th:replace="~{modules/widgets/categories}" />
             <th:block th:case="tags" th:replace="~{modules/widgets/tags}" />
           </th:block>
