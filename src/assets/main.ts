@@ -14,7 +14,6 @@ import { initImagePreview } from "./utils/preview-core";
 import { generateToc } from "./utils/toc";
 import { showToast } from "./utils/toast";
 import { initPjax } from "./utils/pjax";
-import { ensureReady as shikiReady, highlightAll as shikiHighlight } from "./utils/shiki";
 
 (window as unknown as Record<string, unknown>).showToast = showToast;
 window.Alpine = Alpine;
@@ -26,8 +25,6 @@ Alpine.data("share", share);
 Alpine.data("uiPermission", uiPermission);
 
 if (document.querySelector("[x-data]")) Alpine.start();
-
-// ── No toolbar — code blocks are plain Shiki output
 
 // ── Init ──────────────────────────────────────────────────────────
 
