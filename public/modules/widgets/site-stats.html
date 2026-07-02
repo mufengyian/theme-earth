@@ -6,15 +6,15 @@
     </h2>
     <div class="grid grid-cols-2 gap-3">
       <div class="rounded-lg bg-gray-50 p-3 text-center dark:bg-slate-700/50">
-        <div class="text-xl font-bold text-blue-600 dark:text-blue-400" id="site-stats-posts">--</div>
+        <div class="text-xl font-bold text-blue-600 dark:text-blue-400" th:text="${statistics?.posts ?: '--'}"></div>
         <div class="mt-0.5 text-xs text-gray-500 dark:text-slate-400" th:text="#{widget.siteStats.posts}"></div>
       </div>
       <div class="rounded-lg bg-gray-50 p-3 text-center dark:bg-slate-700/50">
-        <div class="text-xl font-bold text-green-600 dark:text-green-400" id="site-stats-comments">--</div>
+        <div class="text-xl font-bold text-green-600 dark:text-green-400" th:text="${statistics?.comments ?: '--'}"></div>
         <div class="mt-0.5 text-xs text-gray-500 dark:text-slate-400" th:text="#{widget.siteStats.comments}"></div>
       </div>
       <div class="rounded-lg bg-gray-50 p-3 text-center dark:bg-slate-700/50">
-        <div class="text-xl font-bold text-purple-600 dark:text-purple-400" id="site-stats-visits">--</div>
+        <div class="text-xl font-bold text-purple-600 dark:text-purple-400" th:text="${statistics?.visits ?: '--'}"></div>
         <div class="mt-0.5 text-xs text-gray-500 dark:text-slate-400" th:text="#{widget.siteStats.visits}"></div>
       </div>
       <div class="rounded-lg bg-gray-50 p-3 text-center dark:bg-slate-700/50">
@@ -24,46 +24,17 @@
     </div>
   </div>
   <script is:inline>
-    /* <![CDATA[ */
-    (function() {
-      var base = document.querySelector("script[data-site-start]");
-      var startDate = base ? base.getAttribute("data-site-start") : "2024-01-01";
-      var themeConfig = { startDate: startDate };
+    (function(){
+      var el = document.getElementById("site-stats-days");
+      if (!el) return;
+      var startDate = "2024-01-01";
       try {
-        var cfg = document.querySelector("script[th\:inline]");
-        if (cfg) {
-          var match = cfg.textContent.match(/siteStartDate\s*[:=]\s*["\']([^"\'\n]+)["\']/);
-          if (match) themeConfig.startDate = match[1];
-          match = cfg.textContent.match(/statistics[:=]\s*(\{[^}]+\})/);
-          if (match) {
-            try { var stats = eval("(" + match[1] + ")"); } catch(e) {}
-          }
-        }
+        var s = document.querySelector("[data-site-start]");
+        if (s) startDate = s.getAttribute("data-site-start");
+        else if (window.siteStartDate) startDate = window.siteStartDate;
       } catch(e) {}
-      // Running days
-      var daysEl = document.getElementById("site-stats-days");
-      if (daysEl) {
-        var diff = Math.floor((Date.now() - new Date(themeConfig.startDate).getTime()) / 86400000);
-        daysEl.textContent = diff > 0 ? diff : 0;
-      }
-      // Try to fetch stats from Halo API
-      var xhr = new XMLHttpRequest();
-      xhr.open("GET", "/apis/api.halo.run/v1alpha1/stats", true);
-      xhr.onload = function() {
-        if (xhr.status === 200) {
-          try {
-            var data = JSON.parse(xhr.responseText);
-            var pe = document.getElementById("site-stats-posts");
-            if (pe && data.posts != null) pe.textContent = data.posts;
-            var ce = document.getElementById("site-stats-comments");
-            if (ce && data.comments != null) ce.textContent = data.comments;
-            var ve = document.getElementById("site-stats-visits");
-            if (ve && data.visits != null) ve.textContent = data.visits;
-          } catch(e) {}
-        }
-      };
-      xhr.send();
+      var diff = Math.floor((Date.now() - new Date(startDate).getTime()) / 86400000);
+      el.textContent = diff > 0 ? diff : 0;
     })();
-    /* ]]> */
   </script>
 </th:fragment>
