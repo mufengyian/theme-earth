@@ -27,78 +27,20 @@ Alpine.data("uiPermission", uiPermission);
 
 if (document.querySelector("[x-data]")) Alpine.start();
 
-// ── Code block toolbar (copy + collapse) ──────────────────────────
-
-function enhanceCodeBlocks(): void {
-  document.querySelectorAll("pre.shiki:not([data-enhanced])").forEach(function(pre) {
-    // Skip if already wrapped (Shiki re-render replaces pre inside existing wrapper)
-    if (pre.parentElement?.classList.contains("code-block-wrapper")) {
-      pre.setAttribute("data-enhanced", "true");
-      return;
-    }
-    pre.setAttribute("data-enhanced", "true");
-
-    var wrapper = document.createElement("div");
-    wrapper.className = "code-block-wrapper";
-    pre.parentNode?.insertBefore(wrapper, pre);
-    wrapper.appendChild(pre);
-
-    var toolbar = document.createElement("div");
-    toolbar.className = "code-toolbar";
-
-    // Copy
-    var copyBtn = document.createElement("button");
-    copyBtn.className = "code-btn";
-    copyBtn.innerHTML = '<span class="icon">⎘</span> Copy';
-    copyBtn.addEventListener("click", function() {
-      var code = pre.querySelector("code");
-      var text = code ? code.textContent || "" : pre.textContent || "";
-      navigator.clipboard.writeText(text).then(function() {
-        copyBtn.classList.add("copied");
-        copyBtn.innerHTML = '<span class="icon">✓</span> Copied!';
-        setTimeout(function() {
-          copyBtn.classList.remove("copied");
-          copyBtn.innerHTML = '<span class="icon">⎘</span> Copy';
-        }, 2000);
-      }).catch(function(){});
-    });
-    toolbar.appendChild(copyBtn);
-
-    // Collapse (if tall)
-    var h = pre.offsetHeight;
-    if (h > 450) {
-      wrapper.classList.add("is-collapsed");
-      var collapseBtn = document.createElement("button");
-      collapseBtn.className = "code-btn";
-      collapseBtn.innerHTML = '<span class="icon">▼</span> Expand';
-      collapseBtn.addEventListener("click", function() {
-        var e = wrapper.classList.contains("is-expanded");
-        wrapper.classList.remove("is-collapsed", "is-expanded");
-        wrapper.classList.add(e ? "is-collapsed" : "is-expanded");
-        collapseBtn.innerHTML = e
-          ? '<span class="icon">▼</span> Expand'
-          : '<span class="icon">▲</span> Collapse';
-      });
-      toolbar.insertBefore(collapseBtn, copyBtn);
-    }
-
-    wrapper.parentNode?.insertBefore(toolbar, wrapper);
-  });
-}
+// ── No toolbar — code blocks are plain Shiki output
 
 // ── Init ──────────────────────────────────────────────────────────
 
 const init = async () => {
   shikiReady();
   await shikiHighlight();
-  enhanceCodeBlocks();
   initImagePreview();
   generateToc("content", ".toc", ".toc-container");
   initPjax();
 
   // Re-render Shiki blocks when user switches dark/light mode
   var mo = new MutationObserver(function() {
-    shikiHighlight().then(function() { enhanceCodeBlocks(); });
+    shikiHighlight().;
   });
   mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 };
