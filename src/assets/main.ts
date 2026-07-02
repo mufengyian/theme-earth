@@ -15,8 +15,7 @@ import { generateToc } from "./utils/toc";
 import { showToast } from "./utils/toast";
 import { initPjax } from "./utils/pjax";
 import hljs from "highlight.js";
-import darkCss from "highlight.js/styles/atom-one-dark.css?inline";
-import lightCss from "highlight.js/styles/atom-one-light.css?inline";
+import "highlight.js/styles/atom-one-dark.css";
 
 (window as unknown as Record<string, unknown>).showToast = showToast;
 window.Alpine = Alpine;
@@ -29,73 +28,59 @@ Alpine.data("uiPermission", uiPermission);
 
 if (document.querySelector("[x-data]")) Alpine.start();
 
-// ── highlight.js: dual-theme via CSS cascade ──────────────────────
-
-function scopeCss(css: string, prefix: string): string {
-  return css.replace(/([^{}]+)\{([^{}]*)\}/g, (_m: string, s: string, p: string) => {
-    return s.replace(/[;{}]/g, "").trim().split(",").map(s=>s.trim()).filter(Boolean).map(s=>`${prefix} ${s}`).join(", ") + ` {${p}}`;
-  });
-}
-
-function injectStyle(css: string, id: string): void {
-  let el = document.getElementById(id) as HTMLStyleElement | null;
-  if (el) { el.textContent = css; return; }
-  el = document.createElement("style");
-  el.id = id;
-  el.textContent = css;
-  document.head.appendChild(el);
-}
-
-function applyHljsThemes(): void {
-  injectStyle(scopeCss(lightCss, ":root:not(.dark)"), "hljs-light");
-  injectStyle(scopeCss(darkCss, ":root.dark"), "hljs-dark");
-}
-
-// ── Code block enhancements (copy + collapse) ─────────────────────
+// ── Code block toolbar (copy button + auto-collapse long blocks) ──
 
 function enhanceCodeBlocks(): void {
-  document.querySelectorAll("pre:not([data-enhanced])").forEach((pre) => {
+  document.querySelectorAll("pre:not([data-enhanced])").forEach(function(pre) {
     pre.setAttribute("data-enhanced", "true");
+
+    // Wrapper for collapse
+    var wrapper = document.createElement("div");
+    wrapper.className = "code-block-wrapper";
+    pre.parentNode?.insertBefore(wrapper, pre);
+    wrapper.appendChild(pre);
 
     // Toolbar
     var toolbar = document.createElement("div");
     toolbar.className = "code-toolbar";
 
-    // Collapse button (only if tall)
-    var wrapper = document.createElement("div");
-    wrapper.className = "code-block-wrapper is-collapsed";
-    pre.parentNode?.insertBefore(wrapper, pre);
-    wrapper.appendChild(pre);
-
-    var collapseBtn = document.createElement("button");
-    collapseBtn.className = "code-btn";
-    collapseBtn.innerHTML = '<span class="icon">▼</span> Expand';
-    collapseBtn.addEventListener("click", function () {
-      var expanded = wrapper.classList.toggle("is-expanded");
-      wrapper.classList.toggle("is-collapsed", !expanded);
-      collapseBtn.innerHTML = expanded
-        ? '<span class="icon">▲</span> Collapse'
-        : '<span class="icon">▼</span> Expand';
-    });
-    toolbar.appendChild(collapseBtn);
-
     // Copy button
     var copyBtn = document.createElement("button");
     copyBtn.className = "code-btn";
     copyBtn.innerHTML = '<span class="icon">⎘</span> Copy';
-    copyBtn.addEventListener("click", function () {
+    copyBtn.addEventListener("click", function() {
       var code = pre.querySelector("code");
       var text = code ? code.textContent || "" : pre.textContent || "";
-      navigator.clipboard.writeText(text).then(function () {
+      navigator.clipboard.writeText(text).then(function() {
         copyBtn.classList.add("copied");
         copyBtn.innerHTML = '<span class="icon">✓</span> Copied!';
-        setTimeout(function () {
+        setTimeout(function() {
           copyBtn.classList.remove("copied");
           copyBtn.innerHTML = '<span class="icon">⎘</span> Copy';
         }, 2000);
-      }).catch(function () {});
+      }).catch(function(){});
     });
-    toolbar.insertBefore(copyBtn, collapseBtn);
+    toolbar.appendChild(copyBtn);
+
+    // Only add collapse if tall enough
+    var preHeight = pre.offsetHeight;
+    var COLLAPSE_THRESHOLD = 450;
+    if (preHeight > COLLAPSE_THRESHOLD) {
+      wrapper.classList.add("is-collapsed");
+      var collapseBtn = document.createElement("button");
+      collapseBtn.className = "code-btn";
+      collapseBtn.innerHTML = '<span class="icon">▼</span> Expand';
+      collapseBtn.addEventListener("click", function() {
+        var expanded = wrapper.classList.contains("is-expanded");
+        wrapper.classList.remove("is-collapsed", "is-expanded");
+        wrapper.classList.add(expanded ? "is-collapsed" : "is-expanded");
+        collapseBtn.innerHTML = expanded
+          ? '<span class="icon">▼</span> Expand'
+          : '<span class="icon">▲</span> Collapse';
+      });
+      toolbar.insertBefore(collapseBtn, copyBtn);
+    }
+
     wrapper.parentNode?.insertBefore(toolbar, wrapper);
   });
 }
