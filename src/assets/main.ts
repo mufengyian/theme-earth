@@ -24,7 +24,7 @@ Alpine.data("upvote", upvote);
 Alpine.data("share", share);
 Alpine.data("uiPermission", uiPermission);
 
-if (document.querySelector("[x-data]")) Alpine.start();
+Alpine.start();
 
 const init = async () => {
   initImagePreview();
