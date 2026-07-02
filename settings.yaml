@@ -339,6 +339,20 @@ spec:
                   value: profile
                 - label: 站点统计
                   value: site-stats
+            - $formkit: group
+              if: "$value.value === 'site-stats'"
+              name: options
+              key: site-stats-options
+              id: site-stats-options
+              label: 站点统计选项
+              children:
+                - $formkit: date
+                  name: start_date
+                  id: start_date
+                  key: start_date
+                  label: 建站日期
+                  value: "2024-01-01"
+                  help: 用于计算站点运行天数
                 - label: 热门文章
                   value: popular-posts
                 - label: 文章分类
