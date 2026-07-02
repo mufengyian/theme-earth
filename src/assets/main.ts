@@ -84,14 +84,18 @@ function enhanceCodeBlocks(): void {
 // ── Init ──────────────────────────────────────────────────────────
 
 const init = async () => {
-  // Preload Shiki
   shikiReady();
-  // Highlight code blocks
   await shikiHighlight();
   enhanceCodeBlocks();
   initImagePreview();
   generateToc("content", ".toc", ".toc-container");
   initPjax();
+
+  // Re-render Shiki blocks when user switches dark/light mode
+  var mo = new MutationObserver(function() {
+    shikiHighlight().then(function() { enhanceCodeBlocks(); });
+  });
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 };
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
