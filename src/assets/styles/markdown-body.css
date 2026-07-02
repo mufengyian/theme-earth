@@ -70,9 +70,6 @@
     }
   }
 
-  .dark .markdown-body pre {
-    background: #181825 !important;
-  }
 
   /* Code block toolbar (copy button) */
   .code-toolbar {
@@ -123,16 +120,17 @@
     font-size: 0.85rem;
   }
 
-  /* Collapsed state for long code blocks */
-  .code-block-wrapper {
-    max-height: 400px;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    position: relative;
+  /* Collapse wrapper — only constrain when collapsed */
+  .code-block-wrapper > pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
   }
 
   .code-block-wrapper.is-collapsed {
+    position: relative;
     max-height: 400px;
+    overflow: hidden;
   }
 
   .code-block-wrapper.is-expanded {
@@ -148,16 +146,6 @@
     height: 3rem;
     background: linear-gradient(transparent, #1e1e2e);
     pointer-events: none;
-  }
-
-  .code-block-wrapper > pre {
-    margin: 0;
-    padding: 1rem;
-    overflow-x: auto;
-  }
-
-  .dark .code-block-wrapper.is-collapsed::after {
-    background: linear-gradient(transparent, #181825);
   }
 
   /* Inline code */
