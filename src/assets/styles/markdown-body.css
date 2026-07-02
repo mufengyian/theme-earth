@@ -1,5 +1,14 @@
 @reference "./tailwind.css";
 
+/* CSS variables for code blocks */
+:root {
+  --codeblock-bg: #1e1e2e;
+}
+
+.dark {
+  --codeblock-bg: #181825;
+}
+
 /*
  * Markdown body styling — uses Tailwind Typography (@tailwindcss/typography)
  * for consistent, readable article content.
@@ -55,15 +64,16 @@
     background-color: var(--earthquake-surface-muted);
   }
 
-  /* Code blocks: Shiki handles syntax highlighting. */
+  /* Code blocks — Shiki handles syntax, we provide layout + variables */
   pre.shiki {
     position: relative;
     padding: 1rem !important;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     overflow-x: auto;
     margin: 1.25rem 0;
     line-height: 1.6;
     font-size: 0.875rem;
+    background: var(--codeblock-bg, #1e1e2e) !important;
   }
 
 
