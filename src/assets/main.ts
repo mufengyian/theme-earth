@@ -51,17 +51,67 @@ function applyHljsThemes(): void {
   injectStyle(scopeCss(darkCss, ":root.dark"), "hljs-dark");
 }
 
+// ── Code block enhancements (copy + collapse) ─────────────────────
+
+function enhanceCodeBlocks(): void {
+  document.querySelectorAll("pre:not([data-enhanced])").forEach((pre) => {
+    pre.setAttribute("data-enhanced", "true");
+
+    // Toolbar
+    var toolbar = document.createElement("div");
+    toolbar.className = "code-toolbar";
+
+    // Collapse button (only if tall)
+    var wrapper = document.createElement("div");
+    wrapper.className = "code-block-wrapper is-collapsed";
+    pre.parentNode?.insertBefore(wrapper, pre);
+    wrapper.appendChild(pre);
+
+    var collapseBtn = document.createElement("button");
+    collapseBtn.className = "code-btn";
+    collapseBtn.innerHTML = '<span class="icon">▼</span> Expand';
+    collapseBtn.addEventListener("click", function () {
+      var expanded = wrapper.classList.toggle("is-expanded");
+      wrapper.classList.toggle("is-collapsed", !expanded);
+      collapseBtn.innerHTML = expanded
+        ? '<span class="icon">▲</span> Collapse'
+        : '<span class="icon">▼</span> Expand';
+    });
+    toolbar.appendChild(collapseBtn);
+
+    // Copy button
+    var copyBtn = document.createElement("button");
+    copyBtn.className = "code-btn";
+    copyBtn.innerHTML = '<span class="icon">⎘</span> Copy';
+    copyBtn.addEventListener("click", function () {
+      var code = pre.querySelector("code");
+      var text = code ? code.textContent || "" : pre.textContent || "";
+      navigator.clipboard.writeText(text).then(function () {
+        copyBtn.classList.add("copied");
+        copyBtn.innerHTML = '<span class="icon">✓</span> Copied!';
+        setTimeout(function () {
+          copyBtn.classList.remove("copied");
+          copyBtn.innerHTML = '<span class="icon">⎘</span> Copy';
+        }, 2000);
+      }).catch(function () {});
+    });
+    toolbar.insertBefore(copyBtn, collapseBtn);
+    wrapper.parentNode?.insertBefore(toolbar, wrapper);
+  });
+}
+
 // ── Init ──────────────────────────────────────────────────────────
 
 const init = async () => {
   applyHljsThemes();
   hljs.highlightAll();
+  enhanceCodeBlocks();
   initImagePreview();
   generateToc("content", ".toc", ".toc-container");
   initPjax();
 
   // Watch <html> class changes for dark/light toggle
-  var mo = new MutationObserver(function() { applyHljsThemes(); hljs.highlightAll(); });
+  var mo = new MutationObserver(function() { applyHljsThemes(); hljs.highlightAll(); enhanceCodeBlocks(); });
   mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 };
 
