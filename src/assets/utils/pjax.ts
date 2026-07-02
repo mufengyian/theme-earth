@@ -1,6 +1,7 @@
 import { rafThrottle } from "./raf";
 import { initImagePreview } from "./preview-core";
 import { generateToc } from "./toc";
+import hljs from "highlight.js";
 
 const MAIN = "main#main-content", LOAD = "pjax-loading", THRESH = 300;
 let fetchCtrl: AbortController | null = null;
@@ -33,6 +34,7 @@ async function nav(url: string, push: boolean) {
     if (push) history.pushState({ url }, "", url);
     window.scrollTo(0, 0);
     initImagePreview(); generateToc("content", ".toc", ".toc-container");
+    hljs.highlightAll();
     bindScroll();
     const m = document.querySelector(MAIN);
     if (m && (window as any).Alpine?.initTree) (window as any).Alpine.initTree(m);
