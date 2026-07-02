@@ -4,34 +4,23 @@
       <span class="icon-[tabler--chart-bar] text-blue-500"></span>
       <span th:text="#{widget.siteStats.title}"></span>
     </h2>
-    <div class="grid grid-cols-2 gap-3">
-      <div class="rounded-lg bg-gray-50 p-3 text-center dark:bg-slate-700/50">
-        <div class="text-xl font-bold text-blue-600 dark:text-blue-400" th:text="${statistics?.posts ?: '--'}"></div>
-        <div class="mt-0.5 text-xs text-gray-500 dark:text-slate-400" th:text="#{widget.siteStats.posts}"></div>
-      </div>
-      <div class="rounded-lg bg-gray-50 p-3 text-center dark:bg-slate-700/50">
-        <div class="text-xl font-bold text-green-600 dark:text-green-400" th:text="${statistics?.comments ?: '--'}"></div>
-        <div class="mt-0.5 text-xs text-gray-500 dark:text-slate-400" th:text="#{widget.siteStats.comments}"></div>
-      </div>
-      <div class="rounded-lg bg-gray-50 p-3 text-center dark:bg-slate-700/50">
-        <div class="text-xl font-bold text-purple-600 dark:text-purple-400" th:text="${statistics?.visits ?: '--'}"></div>
-        <div class="mt-0.5 text-xs text-gray-500 dark:text-slate-400" th:text="#{widget.siteStats.visits}"></div>
-      </div>
-      <div class="rounded-lg bg-gray-50 p-3 text-center dark:bg-slate-700/50">
-        <div class="text-xl font-bold text-amber-600 dark:text-amber-400" id="site-stats-days">--</div>
-        <div class="mt-0.5 text-xs text-gray-500 dark:text-slate-400" th:text="#{widget.siteStats.days}"></div>
-      </div>
+    <div class="flex flex-col items-center gap-2 py-2">
+      <div class="text-4xl font-bold text-amber-600 dark:text-amber-400" id="site-stats-days">--</div>
+      <div class="text-sm text-gray-500 dark:text-slate-400" th:text="#{widget.siteStats.days}"></div>
+      <div class="mt-1 text-xs text-gray-400 dark:text-slate-500" th:if="${statistics?.posts != null}" th:text="|文章 ${statistics.posts} · 评论 ${statistics.comments} · 访问 ${statistics.visits}|"></div>
     </div>
-    <div th:if="${theme.config.widgets?.site_stats?.start_date != null}" data-site-start th:attr="data-site-start=${theme.config.widgets.site_stats.start_date}" class="hidden"></div>
+  </div>
+  <div th:if="${theme.config.sidebar?.widgets != null}" th:each="w : ${theme.config.sidebar.widgets}" th:with="opt=${w.options}">
+    <div th:if="${w.value == 'site-stats' and opt?.start_date != null}" data-site-start th:attr="data-site-start=${opt.start_date}" class="hidden"></div>
   </div>
   <script is:inline>
     (function(){
-      var el = document.getElementById("site-stats-days");
-      if (!el) return;
-      var el2 = document.querySelector("[data-site-start]");
-      var startDate = el2 ? el2.getAttribute("data-site-start") : (window.siteStartDate || "2024-01-01");
+      var daysEl = document.getElementById("site-stats-days");
+      if (!daysEl) return;
+      var src = document.querySelector("[data-site-start]");
+      var startDate = src ? src.getAttribute("data-site-start") : (window.siteStartDate || "2024-01-01");
       var diff = Math.floor((Date.now() - new Date(startDate).getTime()) / 86400000);
-      el.textContent = diff > 0 ? diff : 0;
+      daysEl.textContent = diff > 0 ? diff : 0;
     })();
   </script>
 </th:fragment>
