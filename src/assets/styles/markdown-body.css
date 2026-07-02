@@ -57,9 +57,12 @@
 
   /* Code blocks: highlight.js handles highlighting. */
   pre {
-    padding: 1rem;
+    position: relative;
+    padding: 0;
     border-radius: 0.5rem;
-    overflow-x: auto;
+    overflow: hidden;
+    background: #1e1e2e !important;
+    margin: 1.25rem 0;
 
     code {
       border: none;
@@ -67,12 +70,106 @@
     }
   }
 
+  .dark .markdown-body pre {
+    background: #181825 !important;
+  }
+
+  /* Code block toolbar (copy button) */
+  .code-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.35rem 0.75rem;
+    background: #2a2a3c;
+    border-bottom: 1px solid #363648;
+    gap: 0.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .dark .code-toolbar {
+    background: #1e1e2e;
+    border-bottom-color: #2a2a3c;
+  }
+
+  .code-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.75rem;
+    font-family: inherit;
+    color: #a0a0b8;
+    background: transparent;
+    border: 1px solid #4a4a5e;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+
+  .code-btn:hover {
+    color: #e0e0f0;
+    background: #3a3a50;
+    border-color: #6a6a80;
+  }
+
+  .code-btn.copied {
+    color: #a6e3a1;
+    border-color: #a6e3a1;
+  }
+
+  .code-btn .icon {
+    font-size: 0.85rem;
+  }
+
+  /* Collapsed state for long code blocks */
+  .code-block-wrapper {
+    max-height: 400px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    position: relative;
+  }
+
+  .code-block-wrapper.is-collapsed {
+    max-height: 400px;
+  }
+
+  .code-block-wrapper.is-expanded {
+    max-height: none;
+  }
+
+  .code-block-wrapper.is-collapsed::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3rem;
+    background: linear-gradient(transparent, #1e1e2e);
+    pointer-events: none;
+  }
+
+  .code-block-wrapper > pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+
+  .dark .code-block-wrapper.is-collapsed::after {
+    background: linear-gradient(transparent, #181825);
+  }
+
   /* Inline code */
   :not(pre) > code {
-    background-color: var(--earthquake-surface-muted);
+    background-color: rgba(100, 116, 139, 0.15);
     padding: 0.125rem 0.375rem;
     border-radius: 0.25rem;
     font-size: 0.875em;
+  }
+
+  .dark :not(pre) > code {
+    background-color: rgba(148, 163, 184, 0.12);
   }
 
   /* Images in paragraphs */
