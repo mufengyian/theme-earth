@@ -14,45 +14,7 @@ import { initImagePreview } from "./utils/preview-core";
 import { generateToc } from "./utils/toc";
 import { showToast } from "./utils/toast";
 import { initPjax } from "./utils/pjax";
-
-// highlight.js — 只注册博客用到的语言
-import hljs from "highlight.js/lib/core";
-import bash from "highlight.js/lib/languages/bash";
-import css from "highlight.js/lib/languages/css";
-import diff from "highlight.js/lib/languages/diff";
-import dockerfile from "highlight.js/lib/languages/dockerfile";
-import go from "highlight.js/lib/languages/go";
-import ini from "highlight.js/lib/languages/ini";
-import java from "highlight.js/lib/languages/java";
-import javascript from "highlight.js/lib/languages/javascript";
-import json from "highlight.js/lib/languages/json";
-import markdown from "highlight.js/lib/languages/markdown";
-import nginx from "highlight.js/lib/languages/nginx";
-import python from "highlight.js/lib/languages/python";
-import rust from "highlight.js/lib/languages/rust";
-import sql from "highlight.js/lib/languages/sql";
-import typescript from "highlight.js/lib/languages/typescript";
-import xml from "highlight.js/lib/languages/xml";
-import yaml from "highlight.js/lib/languages/yaml";
-import "highlight.js/styles/atom-one-dark.css";
-
-hljs.registerLanguage("bash", bash);
-hljs.registerLanguage("css", css);
-hljs.registerLanguage("diff", diff);
-hljs.registerLanguage("dockerfile", dockerfile);
-hljs.registerLanguage("go", go);
-hljs.registerLanguage("ini", ini);
-hljs.registerLanguage("java", java);
-hljs.registerLanguage("javascript", javascript);
-hljs.registerLanguage("json", json);
-hljs.registerLanguage("markdown", markdown);
-hljs.registerLanguage("nginx", nginx);
-hljs.registerLanguage("python", python);
-hljs.registerLanguage("rust", rust);
-hljs.registerLanguage("sql", sql);
-hljs.registerLanguage("typescript", typescript);
-hljs.registerLanguage("xml", xml);
-hljs.registerLanguage("yaml", yaml);
+import { ensureReady as shikiReady, highlightAll as shikiHighlight } from "./utils/shiki";
 
 (window as unknown as Record<string, unknown>).showToast = showToast;
 window.Alpine = Alpine;
@@ -65,23 +27,21 @@ Alpine.data("uiPermission", uiPermission);
 
 if (document.querySelector("[x-data]")) Alpine.start();
 
-// ── Code block toolbar (copy button + auto-collapse long blocks) ──
+// ── Code block toolbar (copy + collapse) ──────────────────────────
 
 function enhanceCodeBlocks(): void {
-  document.querySelectorAll("pre:not([data-enhanced])").forEach(function(pre) {
+  document.querySelectorAll("pre.shiki:not([data-enhanced])").forEach(function(pre) {
     pre.setAttribute("data-enhanced", "true");
 
-    // Wrapper for collapse
     var wrapper = document.createElement("div");
     wrapper.className = "code-block-wrapper";
     pre.parentNode?.insertBefore(wrapper, pre);
     wrapper.appendChild(pre);
 
-    // Toolbar
     var toolbar = document.createElement("div");
     toolbar.className = "code-toolbar";
 
-    // Copy button
+    // Copy
     var copyBtn = document.createElement("button");
     copyBtn.className = "code-btn";
     copyBtn.innerHTML = '<span class="icon">⎘</span> Copy';
@@ -99,19 +59,18 @@ function enhanceCodeBlocks(): void {
     });
     toolbar.appendChild(copyBtn);
 
-    // Only add collapse if tall enough
-    var preHeight = pre.offsetHeight;
-    var COLLAPSE_THRESHOLD = 450;
-    if (preHeight > COLLAPSE_THRESHOLD) {
+    // Collapse (if tall)
+    var h = pre.offsetHeight;
+    if (h > 450) {
       wrapper.classList.add("is-collapsed");
       var collapseBtn = document.createElement("button");
       collapseBtn.className = "code-btn";
       collapseBtn.innerHTML = '<span class="icon">▼</span> Expand';
       collapseBtn.addEventListener("click", function() {
-        var expanded = wrapper.classList.contains("is-expanded");
+        var e = wrapper.classList.contains("is-expanded");
         wrapper.classList.remove("is-collapsed", "is-expanded");
-        wrapper.classList.add(expanded ? "is-collapsed" : "is-expanded");
-        collapseBtn.innerHTML = expanded
+        wrapper.classList.add(e ? "is-collapsed" : "is-expanded");
+        collapseBtn.innerHTML = e
           ? '<span class="icon">▼</span> Expand'
           : '<span class="icon">▲</span> Collapse';
       });
@@ -125,7 +84,10 @@ function enhanceCodeBlocks(): void {
 // ── Init ──────────────────────────────────────────────────────────
 
 const init = async () => {
-  hljs.highlightAll();
+  // Preload Shiki
+  shikiReady();
+  // Highlight code blocks
+  await shikiHighlight();
   enhanceCodeBlocks();
   initImagePreview();
   generateToc("content", ".toc", ".toc-container");
