@@ -208,6 +208,28 @@
   crossorigin
 />
 
+<!-- Shiki code highlighter preload/warmup -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="preconnect" href="https://esm.sh" crossorigin />
+<th:block th:if="${pluginFinder.available('PluginShiki')}">
+  <!-- Warm up Shiki highlighter early -->
+  <shiki-code light-theme="github-light" dark-theme="github-dark" variant="simple" style="display:none" aria-hidden="true">
+    <pre><code class="language-javascript">console.log("warmup")</code></pre>
+  </shiki-code>
+  <script is:inline>
+    (function() {
+      var check = function() {
+        var codes = document.querySelectorAll("pre > code[class*=\"language-\"]");
+        if (codes.length > 1) {
+          codes[0].dispatchEvent(new CustomEvent("shiki-warmup", { bubbles: true }));
+        }
+      };
+      if (document.readyState === "complete") check();
+      else window.addEventListener("load", check);
+    })();
+  </script>
+</th:block>
+
 <!-- Color scheme init: blocking inline script to prevent FOUC -->
 <script is:inline th:inline="javascript">
   (function() {
