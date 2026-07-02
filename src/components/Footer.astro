@@ -40,7 +40,7 @@
 
         <div th:if="${item.value == 'gongan'} and ${not #strings.isEmpty(item.options?.text)}">
           <p class="flex items-center justify-center gap-1">
-            <img th:src="@{/assets/images/gongan.png}" class="size-4" alt="公安备案"
+            <img th:src="@{/assets/images/gongan.webp}" class="size-4" alt="公安备案"
                  loading="lazy" decoding="async" />
             <a id="gongan-link"
                href="https://beian.mps.gov.cn/#/query/webSearch"
