@@ -1,3 +1,4 @@
+import hljs from "highlight.js";
 import { rafThrottle } from "./raf";
 import { initImagePreview } from "./preview-core";
 import { generateToc } from "./toc";
