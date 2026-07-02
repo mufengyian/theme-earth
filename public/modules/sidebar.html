@@ -11,10 +11,10 @@
       </th:block>
 
       <th:block th:if="${#lists.isEmpty(widgets)}">
-        <th:block th:replace="~{modules/widgets/site-stats :: siteStats}" />
-        <th:block th:replace="~{modules/widgets/popular-posts :: popularPosts}" />
-        <th:block th:replace="~{modules/widgets/categories :: categories}" />
-        <th:block th:replace="~{modules/widgets/tags :: tags}" />
+        <th:block th:replace="~{modules/widgets/site-stats}" />
+        <th:block th:replace="~{modules/widgets/popular-posts}" />
+        <th:block th:replace="~{modules/widgets/categories}" />
+        <th:block th:replace="~{modules/widgets/tags}" />
       </th:block>
 
       <th:block th:unless="${#lists.isEmpty(widgets)}">
