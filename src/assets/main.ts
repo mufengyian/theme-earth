@@ -33,10 +33,7 @@ const init = async () => {
   generateToc("content", ".toc", ".toc-container");
   initPjax();
 
-  // Re-render Shiki blocks when user switches dark/light mode
-  var mo = new MutationObserver(function() {
-    shikiHighlight().;
-  });
+  
   mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 };
 
